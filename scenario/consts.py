@@ -48,7 +48,7 @@ RESULT_TEXT = {False: 'אי-הצלחה',
 
 QUOTE_TYPE_HE_TEXT = {'printing': 'הדפסה',
                       'output': 'פלט',
-                      'negative_ouput': 'פלט שלילי'
+                      'negative_ouput': 'פלט שלילי',
                       'input': 'קלט'
                       }
 
