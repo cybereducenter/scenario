@@ -91,12 +91,10 @@ def play_scenario(scenario, executable_path,
                         escaped_quote_value = re.escape(quote_value)
 
                         # TODO: Here intervene as follows:
-                        if quote['type'] == 'negative_output':
-                            escaped_quote_value = r"^(?!{}$).+".format(escaped_quote_value)
+                        #if quote['type'] == 'negative_output':
+                        #    escaped_quote_value = r"^(?!{}$).+".format(escaped_quote_value)
                         
                         pattern_quote_value = re.compile(escaped_quote_value)
-
-                        import pdb; pdb.set_trace()
 
                         patterns.append(pattern_quote_value)
 
@@ -145,6 +143,7 @@ def play_scenario(scenario, executable_path,
                                                           })
                     # THE MATCH of the quote
                     assert p.after is not None
+                    import pdb; pdb.set_trace()
                     log_quote = {'type': get_quote_type_dict('output'),
                                  'name': quote['name'],
                                  'value': p.after,
@@ -324,7 +323,7 @@ def play_scenario(scenario, executable_path,
 
     # Generate feedback LOG text
     for quote in feedback['log']['quotes']:
-        if quote['type']['en'] == 'output':
+        if quote['type']['en'] == 'output' or quote['type']['en'] == 'negative_output':
             feedback['log']['text'] += '<<'
 
         feedback['log']['text'] += quote['value']
