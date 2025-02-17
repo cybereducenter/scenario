@@ -143,7 +143,6 @@ def play_scenario(scenario, executable_path,
                                                           })
                     # THE MATCH of the quote
                     assert p.after is not None
-                    import pdb; pdb.set_trace()
                     log_quote = {'type': get_quote_type_dict('output'),
                                  'name': quote['name'],
                                  'value': p.after,
@@ -230,6 +229,10 @@ def play_scenario(scenario, executable_path,
 
         except pexpect.TIMEOUT:
             raise ShouldEOF()
+
+        # Negative output flip
+        if quote['type'] == 'negative_output':
+            raise ShouldOutput
 
         feedback['result'] = get_result_dict(True)
         feedback['feedback'] = get_feedback_dict(None)
