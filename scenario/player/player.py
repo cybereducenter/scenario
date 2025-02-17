@@ -92,9 +92,9 @@ def play_scenario(scenario, executable_path,
 
                         # TODO: Here intervene as follows:
                         if quote['type'] == 'negative_output':
-                            pattern_quote_value = re.compile(r"^(?!{}$).+".format(escaped_quote_value))
-                        else:
-                            pattern_quote_value = re.compile(escaped_quote_value)
+                            escaped_quote_value = r"^(?!{}$).+".format(escaped_quote_value)
+                        
+                        pattern_quote_value = re.compile(escaped_quote_value)
 
                         import pdb; pdb.set_trace()
 
