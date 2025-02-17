@@ -70,9 +70,10 @@ def play_scenario(scenario, executable_path,
     try:
         for index, quote in enumerate(scenario['dialogue']):
 
-            if quote['type'] in ['input', 'output']:
+            # TODO: move list of types to constants file...
+            if quote['type'] in ['input', 'output', 'negative_output']:
 
-                if quote['type'] == 'output':
+                if quote['type'] == 'output' or quote['type'] == 'negative_output':
                     patterns = []
 
                     # Right spaces cannot be seen in run example
@@ -89,7 +90,11 @@ def play_scenario(scenario, executable_path,
                     else:
                         escaped_quote_value = re.escape(quote_value)
 
-                        pattern_quote_value = re.compile(escaped_quote_value)
+                        # TODO: Here intervene as follows:
+                        if quote['type'] == 'negative_output':
+                            pattern_quote_value = re.compile(r"^(?!{}$).+".format(escaped_quote_value))
+                        else:
+                            pattern_quote_value = re.compile(escaped_quote_value)
 
                         patterns.append(pattern_quote_value)
 
