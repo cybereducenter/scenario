@@ -232,7 +232,7 @@ def play_scenario(scenario, executable_path,
 
         # Negative output flip
         if quote['type'] == 'negative_output':
-            raise ShouldOutput
+            raise ShouldOutput(quote)
 
         feedback['result'] = get_result_dict(True)
         feedback['feedback'] = get_feedback_dict(None)
