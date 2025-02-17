@@ -96,6 +96,8 @@ def play_scenario(scenario, executable_path,
                         else:
                             pattern_quote_value = re.compile(escaped_quote_value)
 
+                        import pdb; pdb.set_trace()
+
                         patterns.append(pattern_quote_value)
 
                         if 'strictness' in quote:
