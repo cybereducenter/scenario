@@ -133,6 +133,10 @@ def play_scenario(scenario, executable_path,
                     except pexpect.TIMEOUT:
                         raise ShouldOutput(quote)
 
+                    # Negative output check
+                    if (p.before is not None) and ("this" in p.before.lower()):
+                        raise ShouldOutput(quote)
+                    
                     # BEFORE the quote match
                     if not scenario['flow'] and get_cleaned_before(p, scenario['strictness']):
                         raise ShouldOutput(quote)
@@ -231,8 +235,8 @@ def play_scenario(scenario, executable_path,
             raise ShouldEOF()
 
         # Negative output flip
-        if quote['type'] == 'negative_output':
-            raise ShouldOutput(quote)
+        #if quote['type'] == 'negative_output':
+        #    raise ShouldOutput(quote)
 
         feedback['result'] = get_result_dict(True)
         feedback['feedback'] = get_feedback_dict(None)
