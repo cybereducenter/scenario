@@ -161,6 +161,7 @@ def play_scenario(scenario, executable_path,
                     # And, for negative output, make sure the output does not come later.
                     # TODO: change second condition to if there is a negative_ouput to check in the list
                     if not scenario['flow'] or True:
+                        import pdb; pdb.set_trace()
                         p.expect(['\r\n', pexpect.TIMEOUT, pexpect.EOF])
 
                         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
