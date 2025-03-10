@@ -157,13 +157,18 @@ def play_scenario(scenario, executable_path,
                     feedback['log']['quotes'].append(log_quote)
 
                     # for flow False, no output should be
-                    # AFTER the quote match UNTIL the END of the current LINE
-                    if not scenario['flow']:
+                    # AFTER the quote match UNTIL the END of the current LINE.
+                    # And, for negative output, make sure the output does not come later.
+                    # TODO: change second condition to if there is a negative_ouput to check in the list
+                    if not scenario['flow'] or True:
                         p.expect(['\r\n', pexpect.TIMEOUT, pexpect.EOF])
 
                         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
                                                           'value': p.before + xstr(p.after)
                                                           })
+
+                        if (p.before is not None) and ("this" in p.before.lower()):
+                            raise ShouldOutput(quote)
 
                         if get_cleaned_before(p, scenario['strictness']).strip(' '):
                             raise ShouldOutput(quote)
