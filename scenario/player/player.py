@@ -89,10 +89,6 @@ def play_scenario(scenario, executable_path,
 
                     else:
                         escaped_quote_value = re.escape(quote_value)
-
-                        # TODO: Here intervene as follows:
-                        #if quote['type'] == 'negative_output':
-                        #    escaped_quote_value = r"^(?!{}$).+".format(escaped_quote_value)
                         
                         pattern_quote_value = re.compile(escaped_quote_value)
 
@@ -134,8 +130,11 @@ def play_scenario(scenario, executable_path,
                         raise ShouldOutput(quote)
 
                     # Negative output check
-                    if (p.before is not None) and ("this" in p.before.lower()):
-                        raise ShouldOutput(quote)
+                    if (p.before is not None) and ('negative_output' in scenario):
+                        for negative_output in scenario['negative_output']:
+                            if negative_output in get_cleaned_before(p, scenario['strictness']):
+                                # TODO: Create specific exception for negative_output
+                                raise ShouldOutput(quote)
                     
                     # BEFORE the quote match
                     if not scenario['flow'] and get_cleaned_before(p, scenario['strictness']):
@@ -159,18 +158,20 @@ def play_scenario(scenario, executable_path,
                     # for flow False, no output should be
                     # AFTER the quote match UNTIL the END of the current LINE.
                     # And, for negative output, make sure the output does not come later.
-                    # TODO: change second condition to if there is a negative_ouput to check in the list
-                    if not scenario['flow'] or True:
+                    if not scenario['flow'] or ('negative_output' in scenario):
                         p.expect(['\r\n', pexpect.TIMEOUT, pexpect.EOF])
 
                         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
                                                           'value': p.before + xstr(p.after)
                                                           })
 
-                        if (p.before is not None) and ("this" in p.before.lower()):
-                            raise ShouldOutput(quote)
+                        if (p.before is not None) and ('negative_output' in scenario):
+                            for negative_output in scenario['negative_output']:
+                                if negative_output in get_cleaned_before(p, scenario['strictness']):
+                                    # TODO: Create specific exception for negative_output
+                                    raise ShouldOutput(quote)
 
-                        if get_cleaned_before(p, scenario['strictness']).strip(' '):
+                        if get_cleaned_before(p, scenario['strictness']).strip(' ') and not scenario['flow']:
                             raise ShouldOutput(quote)
 
                     '''
