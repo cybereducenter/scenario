@@ -71,9 +71,9 @@ def play_scenario(scenario, executable_path,
         for index, quote in enumerate(scenario['dialogue']):
 
             # TODO: move list of types to constants file...
-            if quote['type'] in ['input', 'output', 'negative_output']:
+            if quote['type'] in ['input', 'output']:
 
-                if quote['type'] == 'output' or quote['type'] == 'negative_output':
+                if quote['type'] == 'output':
                     patterns = []
 
                     # Right spaces cannot be seen in run example
