@@ -14,10 +14,11 @@ from scenario.player.feedback_exceptions import SholdNoOutputBeforeInput, \
     ShouldEOF,                \
     ShouldOutputBeforeEOF,    \
     ShouldInputBeforeEOF,     \
-    ShouldOutput,          \
+    ShouldOutput,             \
+    NegativeOutput,           \
     MemoryFeedbackError
 
-from scenario.utils import xstr,                \
+from scenario.utils import xstr,  \
     get_cleaned_before,  \
     get_cleaned_after,   \
     get_result_dict,     \
@@ -133,8 +134,9 @@ def play_scenario(scenario, executable_path,
                     if (p.before is not None) and ('negative_output' in scenario):
                         for negative_output in scenario['negative_output']:
                             if negative_output in get_cleaned_before(p, scenario['strictness']):
-                                # TODO: Create specific exception for negative_output
-                                raise ShouldOutput(quote)
+                                quote['name'] = 'Negative output'
+                                quote['value'] = negative_output
+                                raise NegativeOutput(quote)
                     
                     # BEFORE the quote match
                     if not scenario['flow'] and get_cleaned_before(p, scenario['strictness']):
@@ -168,8 +170,9 @@ def play_scenario(scenario, executable_path,
                         if (p.before is not None) and ('negative_output' in scenario):
                             for negative_output in scenario['negative_output']:
                                 if negative_output in get_cleaned_before(p, scenario['strictness']):
-                                    # TODO: Create specific exception for negative_output
-                                    raise ShouldOutput(quote)
+                                    quote['name'] = 'Negative output'
+                                    quote['value'] = negative_output
+                                    raise NegativeOutput(quote)
 
                         if get_cleaned_before(p, scenario['strictness']).strip(' ') and not scenario['flow']:
                             raise ShouldOutput(quote)
@@ -255,6 +258,10 @@ def play_scenario(scenario, executable_path,
                                           'value': p.before + xstr(p.after)
                                           })
 
+        feedback['feedback'] = get_feedback_dict(e)
+    
+    except NegativeOutput as e:
+        feedback['result'] = get_result_dict(False)
         feedback['feedback'] = get_feedback_dict(e)
 
     except SholdNoOutputBeforeInput as e:

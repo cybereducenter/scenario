@@ -53,6 +53,16 @@ class ShouldOutput(InternalFeedbackException):
     def __init__(self, quote):
         InternalFeedbackException.__init__(self, ShouldOutput.msg, quote)
 
+class NegativeOutput(InternalFeedbackException):
+    '''
+    A negative value was found before EOF
+    '''
+
+    msg = 'אחד או יותר מן הערכים האסורים הופיעו: {name} ({value})'
+
+    def __init__(self, quote):
+        InternalFeedbackException.__init__(self, NegativeOutput.msg, quote)
+
 
 class ShouldEOF(InternalFeedbackException):
     msg = 'ריצת התוכנית אמורה הייתה להסתיים לאחר הקלטים והפלטים שנבדקו, אך התוכנית עדיין רצה.' + '\n' + \
