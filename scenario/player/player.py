@@ -262,6 +262,9 @@ def play_scenario(scenario, executable_path,
     
     except NegativeOutput as e:
         feedback['result'] = get_result_dict(False)
+        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
+                                          'value': p.before + xstr(p.after)
+                                          })
         feedback['feedback'] = get_feedback_dict(e)
 
     except SholdNoOutputBeforeInput as e:
