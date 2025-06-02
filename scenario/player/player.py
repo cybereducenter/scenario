@@ -16,6 +16,7 @@ from scenario.player.feedback_exceptions import SholdNoOutputBeforeInput, \
     ShouldInputBeforeEOF,     \
     ShouldOutput,             \
     NegativeOutput,           \
+    WriteToFileFailed,        \
     MemoryFeedbackError
 
 from scenario.utils import xstr,  \
@@ -225,6 +226,20 @@ def play_scenario(scenario, executable_path,
                                                       'value': quote['value'] + '\r\n'
                                                       })
 
+        # compare_files logic
+        if 'compare_files' in scenario:
+            file_paths = scenario['compare_files']
+            if file_paths and file_paths[0] != file_paths[-1]:
+                try:
+                    with open(file_paths[0], 'rb') as f1, open(file_paths[-1], 'rb') as f2:
+                        if f1.read() != f2.read():
+                            quote['name'] = 'Write To File Failed'
+                            quote['value'] = file_paths
+                            raise WriteToFileFailed(quote)
+
+
+
+
         if scenario['flow']:
             p.expect(['.+', pexpect.TIMEOUT, pexpect.EOF])
 
@@ -261,6 +276,13 @@ def play_scenario(scenario, executable_path,
         feedback['feedback'] = get_feedback_dict(e)
     
     except NegativeOutput as e:
+        feedback['result'] = get_result_dict(False)
+        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
+                                          'value': p.before + xstr(p.after)
+                                          })
+        feedback['feedback'] = get_feedback_dict(e)
+    
+    except WriteToFileFailed as e:
         feedback['result'] = get_result_dict(False)
         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
                                           'value': p.before + xstr(p.after)
