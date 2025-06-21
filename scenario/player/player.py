@@ -236,10 +236,8 @@ def play_scenario(scenario, executable_path,
                             quote['name'] = 'Write To File Failed'
                             quote['value'] = file_paths
                             raise WriteToFileFailed(quote)
-
-
-
-
+                            
+        
         if scenario['flow']:
             p.expect(['.+', pexpect.TIMEOUT, pexpect.EOF])
 
