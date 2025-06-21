@@ -236,11 +236,13 @@ def play_scenario(scenario, executable_path,
                             quote['name'] = 'Write To File Failed'
                             quote['value'] = file_paths
                             raise WriteToFileFailed(quote)
-                            
+                    except except (FileNotFoundError, OSError) as e:
+                        quote['name'] = 'Open File Failed'
+                        quote['value'] = file_paths
+                        raise WriteToFileFailed(quote)
         
         if scenario['flow']:
             p.expect(['.+', pexpect.TIMEOUT, pexpect.EOF])
-
             feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
                                               'value': p.before + xstr(p.after)
                                               })
