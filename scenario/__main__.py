@@ -16,7 +16,7 @@ from scenario.consts import VERBOSITY,      \
 
 from scenario.utils import build_feedback_text
 
-__version__ = "1.2"
+__version__ = "1.2.2"
 
 def main():
 

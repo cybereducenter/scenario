@@ -233,12 +233,12 @@ def play_scenario(scenario, executable_path,
                 try:
                     with open(file_paths[0], 'rb') as f1, open(file_paths[-1], 'rb') as f2:
                         if f1.read() != f2.read():
-                            quote['name'] = 'Write To File Failed'
-                            quote['value'] = file_paths
+                            quote['name'] = 'Unexpected file content'
+                            quote['value'] = f2
                             raise WriteToFileFailed(quote)
                 except (FileNotFoundError, OSError) as e:
                     quote['name'] = 'Open File Failed'
-                    quote['value'] = file_paths
+                    quote['value'] = file_paths[-1]
                     raise WriteToFileFailed(quote)
         
         if scenario['flow']:
