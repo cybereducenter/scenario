@@ -46,6 +46,7 @@ def break_lines_log_quotes(feedback_log_quotes):
 def play_scenario(scenario, executable_path,
                   executable_extra_args=None):
 
+    is_timeout = False
     feedback = copy.deepcopy(scenario)
     feedback['log'] = {'quotes': [], 'text': ''}
     feedback['feedback'] = {'type': None, 'text': None}
@@ -129,6 +130,7 @@ def play_scenario(scenario, executable_path,
                     except pexpect.EOF:
                         raise ShouldOutputBeforeEOF(quote)
                     except pexpect.TIMEOUT:
+                        is_timeout = True
                         raise ShouldOutput(quote)
 
                     # Negative output check
@@ -256,6 +258,7 @@ def play_scenario(scenario, executable_path,
     # REAL FEEDBACK EXCEPTIONS PART #
 
         except pexpect.TIMEOUT:
+            is_timeout = True
             raise ShouldEOF()
 
         # Negative output flip
@@ -270,7 +273,7 @@ def play_scenario(scenario, executable_path,
 
         # if scenario['flow']:
         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
+                                          'value': '' if is_timeout else p.before + xstr(p.after)
                                           })
 
         feedback['feedback'] = get_feedback_dict(e)
@@ -322,7 +325,7 @@ def play_scenario(scenario, executable_path,
         feedback['result'] = get_result_dict(False)
 
         feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
+                                          'value': '' if is_timeout else p.before + xstr(p.after)
                                           })
 
         if not scenario['flow']:
