@@ -1,0 +1,6 @@
+Refresh doker image after pushing a change to the scenario package:
+
+In the test server (44.195.140.208), open a terminal as user cec, and run the following commands:
+   cd CEC-INGInious-Courses-content-236-mamriot-course/install
+   sudo docker build -t ingi/inginious-c-cec -f Dockerfile-cec .
+   sudo systemctl restart supervisord

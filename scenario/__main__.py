@@ -16,10 +16,13 @@ from scenario.consts import VERBOSITY,      \
 
 from scenario.utils import build_feedback_text
 
+__version__ = "1.2.2"
 
 def main():
 
     parser = argparse.ArgumentParser(description='Checking an IO scenario on execution.')
+
+    parser.add_argument('--version', action='version',version=f'%(prog)s {__version__}')
 
     parser.add_argument('executable_path', type=str,
                         help='executable to be checked')
