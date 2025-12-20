@@ -69,7 +69,16 @@ def main():
 
     try:
         if args.unittest:
-            print("test123")
+            feedback = run_unittest(args.executable_path,
+                                    args.scenario_path,
+                                    args.v,
+                                    args.t,
+                                    args.a)
+
+            result = feedback['result']['bool']
+            signal_ = feedback['signal_code']
+
+            feedback_text = build_feedback_text(feedback)
         
         elif not args.directory:
             feedback = run_scenario(args.executable_path,

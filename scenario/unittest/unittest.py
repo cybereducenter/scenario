@@ -163,15 +163,17 @@ class StandalonePythonUnitTest:
 
 def run_unittest(student_file_path, test_path, verbosity=None, timeout=None, extra_args=None):
     feedback = {
+        "id": "unitest_dummy", #TODO: make this a real id
         "result": {"bool": False},
         "signal_code": None,
         "exit_code": 1,
         "log": {"quotes": [], "text": ""},
-        "feedback": {"type": None, "text": None}
+        "feedback": {"type": "UnknownUnittestError", "text": None}
     }
     log_buffer = []
 
     if not os.path.exists(student_file_path):
+        feedback['feedback']['type'] = "FileError"
         feedback['feedback']['text'] = "Student file not found."
         return feedback
 
