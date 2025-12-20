@@ -9,7 +9,7 @@ Testing console applications I/O
 
 ## Usage
 ```
-usage: scenario [-h] [-v V] [-a A] [-d] [-s] [-t T] [-f {json,text,html}]
+usage: scenario [-h] [-v V] [-a A] [-u] [-d] [-s] [-t T] [-f {json,text,html}]
                 [-p RESOURCES_PATH] [-i ID]
                 executable_path scenario_path
 
