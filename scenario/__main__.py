@@ -22,6 +22,7 @@ __version__ = "1.2.3"
 def main():
 
     result = False
+    feedback_text = None
 
     parser = argparse.ArgumentParser(description='Checking an IO scenario on execution.')
 
@@ -70,7 +71,7 @@ def main():
         if args.unittest:
             print("test123")
         
-        if not args.directory:
+        elif not args.directory:
             feedback = run_scenario(args.executable_path,
                                     args.scenario_path,
                                     args.v,

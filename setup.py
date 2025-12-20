@@ -12,7 +12,7 @@ setup(name='scenario',
                 'scenario.api',
                 'scenario.player',
                 'scenario.parser',
-                'scenario.unittest'
+                'scenario.unittest',
                 'scenario.tests'],
       package_dir={'scenario': 'scenario'},
       package_data={'scenario': ['formats/html/index.html',
