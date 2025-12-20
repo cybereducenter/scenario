@@ -9,6 +9,7 @@ import json
 
 from scenario.runner import run_scenario
 from scenario.parser import ParserError
+from scenario.unittest import run_unittest
 
 from scenario.consts import VERBOSITY,      \
     OUTPUT_FORMATS, OUTPUT_FORMATS_DEFAULT, \
@@ -16,9 +17,11 @@ from scenario.consts import VERBOSITY,      \
 
 from scenario.utils import build_feedback_text
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 def main():
+
+    result = False
 
     parser = argparse.ArgumentParser(description='Checking an IO scenario on execution.')
 
@@ -28,8 +31,12 @@ def main():
                         help='executable to be checked')
 
     parser.add_argument('scenario_path', type=str,
-                        help='scenario file (or directory with -d flag)')
+                        help='test file (or directory with -d flag)')
 
+    parser.add_argument('-u', '--unittest',
+                        help='run a unittest on a python script',
+                        action="store_true")
+    
     parser.add_argument('-v', type=int,
                         help='set output verbosity')
 
@@ -37,7 +44,7 @@ def main():
                         help='set extra arguments for executable')
 
     parser.add_argument('-d', '--directory',
-                        help='run on all scenario files (.json) in the directory',
+                        help='run on all test files (.json) in the directory',
                         action="store_true")
 
     parser.add_argument('-s', '--forward-signal',
@@ -60,6 +67,9 @@ def main():
     args = parser.parse_args()
 
     try:
+        if args.unittest:
+            print("test123")
+        
         if not args.directory:
             feedback = run_scenario(args.executable_path,
                                     args.scenario_path,
