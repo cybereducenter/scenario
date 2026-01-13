@@ -1,2 +1,2 @@
-__all__ = ['run_unittest']
-from scenario.unittest.unittest import run_unittest
+__all__ = ['play_unittest']
+from scenario.unittest.unittest import play_unittest

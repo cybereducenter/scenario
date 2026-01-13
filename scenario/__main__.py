@@ -9,7 +9,7 @@ import json
 
 from scenario.runner import run_scenario
 from scenario.parser import ParserError
-from scenario.unittest import run_unittest
+from scenario.runner import run_unittest
 
 from scenario.consts import VERBOSITY,      \
     OUTPUT_FORMATS, OUTPUT_FORMATS_DEFAULT, \
@@ -69,19 +69,12 @@ def main():
 
     try:
         if args.unittest:
-            feedback = run_unittest(args.executable_path,
-                                    args.scenario_path,
-                                    args.v,
-                                    args.t,
-                                    args.a)
-
-            result = feedback['result']['bool']
-            signal_ = feedback['signal_code']
-
-            feedback_text = build_feedback_text(feedback)
+            run_method = run_unittest
+        else:
+            run_method = run_scenario
         
-        elif not args.directory:
-            feedback = run_scenario(args.executable_path,
+        if not args.directory:
+            feedback = run_method(args.executable_path,
                                     args.scenario_path,
                                     args.v,
                                     args.t,
@@ -103,7 +96,7 @@ def main():
             scenario_file_paths = glob.glob(scenario_file_directory_path)
 
             for scenario_file_path in scenario_file_paths:
-                scenario_file_feedback = run_scenario(args.executable_path,
+                scenario_file_feedback = run_method(args.executable_path,
                                                       scenario_file_path,
                                                       args.v,
                                                       args.t,

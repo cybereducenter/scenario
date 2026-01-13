@@ -18,6 +18,11 @@ FEEDBACK_JSON_SCHEMA = json.loads(
     pkg_resources.resource_stream('scenario',
                                   FEEDBACK_JSON_SCHEMA_PATH).read().decode('utf-8'))
 
+UNITTEST_JSON_SCHEMA_PATH = 'schema/unittest.json'
+UNITTEST_JSON_SCHEMA = json.loads(
+    pkg_resources.resource_stream('scenario',
+                                  UNITTEST_JSON_SCHEMA_PATH).read().decode('utf-8'))
+
 VERBOSITY = OrderedDict(
     [('RETURN_CODE', 0),
      ('RESULT', 1),

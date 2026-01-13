@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "method_name": {
+      "type": "string"
+    },
+    "method_signature": {
+      "type": "string"
+    },
+    "test" :{
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {"type": "string"},
+        "args": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "number",
+              "object",
+              "boolean"
+            ]
+          }
+        },
+        "expected": {
+          "type": "object"
+        },
+        "error": {
+          "type": "string"
+        }
+      }},
+      "required": [
+        "type",
+        "args",
+        "expected"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "method_name",
+    "method_signature",
+    "test"
+  ]
+}

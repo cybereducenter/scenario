@@ -1,0 +1,17 @@
+accessible: true
+author: ''
+context: 'Paste your Python code here:'
+environment_id: cec
+environment_parameters:
+  limits: {memory: '100', time: '90'}
+environment_type: docker
+evaluate: last
+groups: false
+name: Unit 08 - Part 03 - Task 03
+network_grading: false
+problems:
+  program: {header: '', language: python, name: '', type: code}
+stored_submissions: 0
+submission_limit: {amount: 10, period: 24}
+type: python-unit-test
+weight: 2.0
