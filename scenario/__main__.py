@@ -10,6 +10,7 @@ import json
 from scenario.runner import run_scenario
 from scenario.parser import ParserError
 from scenario.runner import run_unittest
+from scenario.reporter import reporter_generate_html
 
 from scenario.consts import VERBOSITY,      \
     OUTPUT_FORMATS, OUTPUT_FORMATS_DEFAULT, \
@@ -66,6 +67,7 @@ def main():
                         help='div id for html output format')
 
     args = parser.parse_args()
+    feedback_list = []
 
     try:
         if args.unittest:
@@ -84,12 +86,9 @@ def main():
             signal_ = feedback['signal_code']
 
             feedback_text = build_feedback_text(feedback)
+            feedback_list.append(feedback)
 
         else:
-            assert args.format != 'html', \
-                'Cannot use `--format html` format with `-d`/`--directory`'
-
-            feedback = []
             feedback_texts = []
 
             scenario_file_directory_path = os.path.join(args.scenario_path, '*.json')
@@ -102,12 +101,12 @@ def main():
                                                       args.t,
                                                       args.a)
 
-                feedback.append(scenario_file_feedback)
+                feedback_list.append(scenario_file_feedback)
                 feedback_texts.append(build_feedback_text(scenario_file_feedback))
 
-            result = all([fb['result']['bool'] for fb in feedback])
+            result = all([fb['result']['bool'] for fb in feedback_list])
 
-            signals = [fb['signal_code'] for fb in feedback]
+            signals = [fb['signal_code'] for fb in feedback_list]
             signal_ = next((item for item in signals if item is not None), None)
 
             feedback_text = '\n\n\n'.join(feedback_texts)
@@ -124,23 +123,14 @@ def main():
         sys.exit(-1)
 
     if args.format == 'json':
-        print(json.dumps(feedback, indent=2, sort_keys=True))
+        print(json.dumps(feedback_list, indent=2, sort_keys=True))
 
     elif args.format == 'text':
         print(feedback_text)
 
     elif args.format == 'html':
-        # feedback have to be an object and not list
-        # because `--format html` cannot be with `--direcotry`
-
-        if not args.resources_path.endswith('/'):
-            args.resources_path += '/'
-
-        print(OUTPUT_HTML_PAGE.format(feedback_json=json.dumps(
-            feedback, indent=2, sort_keys=True),
-            resources_path=args.resources_path,
-            id=args.id))
-
+        print(reporter_generate_html(feedback_list))
+    
     if args.forward_signal and signal_ is not None:
         os.kill(os.getpid(), signal_)
 

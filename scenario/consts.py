@@ -4,24 +4,23 @@ from __future__ import unicode_literals
 
 import os
 import json
-import pkg_resources
+from importlib.resources import files
 
 from collections import OrderedDict
 
-SCENARIO_JSON_SCHEMA_PATH = 'schema/scenario.json'
-SCENARIO_JSON_SCHEMA = json.loads(
-    pkg_resources.resource_stream('scenario',
-                                  SCENARIO_JSON_SCHEMA_PATH).read().decode('utf-8'))
+def _load_schema(rel_path: str) -> dict:
+    # rel_path like "schema/scenario.json"
+    data = files("scenario").joinpath(rel_path).read_text(encoding="utf-8")
+    return json.loads(data)
 
-FEEDBACK_JSON_SCHEMA_PATH = 'schema/feedback.json'
-FEEDBACK_JSON_SCHEMA = json.loads(
-    pkg_resources.resource_stream('scenario',
-                                  FEEDBACK_JSON_SCHEMA_PATH).read().decode('utf-8'))
+SCENARIO_JSON_SCHEMA_PATH = "schema/scenario.json"
+SCENARIO_JSON_SCHEMA = _load_schema(SCENARIO_JSON_SCHEMA_PATH)
 
-UNITTEST_JSON_SCHEMA_PATH = 'schema/unittest.json'
-UNITTEST_JSON_SCHEMA = json.loads(
-    pkg_resources.resource_stream('scenario',
-                                  UNITTEST_JSON_SCHEMA_PATH).read().decode('utf-8'))
+FEEDBACK_JSON_SCHEMA_PATH = "schema/feedback.json"
+FEEDBACK_JSON_SCHEMA = _load_schema(FEEDBACK_JSON_SCHEMA_PATH)
+
+UNITTEST_JSON_SCHEMA_PATH = "schema/unittest.json"
+UNITTEST_JSON_SCHEMA = _load_schema(UNITTEST_JSON_SCHEMA_PATH)
 
 VERBOSITY = OrderedDict(
     [('RETURN_CODE', 0),

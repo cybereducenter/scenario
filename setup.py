@@ -13,6 +13,7 @@ setup(name='scenario',
                 'scenario.player',
                 'scenario.parser',
                 'scenario.unittest',
+                'scenario.reporter',
                 'scenario.tests'],
       package_dir={'scenario': 'scenario'},
       package_data={'scenario': ['formats/html/index.html',
@@ -23,7 +24,7 @@ setup(name='scenario',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 3',
       ],
-      install_requires=['pexpect', 'jsonschema', 'nose'],
+      install_requires=['pexpect', 'jsonschema', 'nose', "Jinja2>=3.0.0"],
       entry_points={
           'console_scripts': [
               'scenario = scenario.__main__:main'
