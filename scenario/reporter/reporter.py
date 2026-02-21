@@ -44,6 +44,7 @@ class RenderTest:
 def reporter_generate_html(
     tests_data: list[dict[str, Any]],
     *,
+    format_type: str = "default",
     css_href: str = "style.css",
     page_title: str = "Report",
     title_text: str = "תוצאות הבדיקה",
@@ -190,7 +191,10 @@ def reporter_generate_html(
         lstrip_blocks=True,
     )
 
-    template = env.get_template("report.html.j2")
+    if format_type == "vpl":
+        template = env.get_template("vpl_report.html.j2")
+    else:
+        template = env.get_template("report.html.j2")
 
     html = template.render(
         page_title=page_title,
@@ -207,4 +211,4 @@ def reporter_generate_html(
         gauge_dashoffset=gauge_dashoffset,
     )
 
-    return html
+    return score_percent, html

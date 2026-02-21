@@ -1,0 +1,103 @@
+<div class="vpl_moodle-report-wrap" dir="rtl">
+    <div class="vpl_wrap">
+
+      <!-- Top summary section -->
+      <div class="vpl_topbar">
+        <div>
+          <div class="vpl_title">{{ title_text }}</div>
+          {% if subtitle_text %}
+            <div class="vpl_sub">{{ subtitle_text }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Gauge score -->
+        <div class="vpl_scoreContainer">
+          <div class="vpl_scoreBox">
+            <svg class="gauge" width="118" height="59" viewBox="0 0 118 59" fill="none">
+              <path d="M 14 58 A 45 45 0 0 1 104 58"
+                    fill="none" stroke="#D3D3DB" stroke-width="24.7552"/>
+              <path d="M 14 58 A 45 45 0 0 1 104 58"
+                    fill="none" stroke="{{ gauge_color }}"
+                    stroke-width="24.7552"
+                    pathLength="100"
+                    stroke-dasharray="100"
+                    stroke-dashoffset="{{ gauge_dashoffset }}" />
+            </svg>
+            <div class="vpl_gauge-text">{{ score_percent }}%</div>
+          </div>
+          <div class="desc">{{ passed }}/{{ total }} תרחישים עברו</div>
+        </div>
+      </div>
+
+      <div class="vpl_sectionTitle">{{ section_title }}</div>
+
+      <!-- Loop over tests -->
+      <div class="vpl_tests">
+        {% for t in tests %}
+          <div class="vpl_test">
+            <div class="vpl_row">
+
+              <!-- Collapsible header -->
+              <div class="vpl_testMain" data-toggle="details_{{ t.id }}">
+                <div class="vpl_test-header-row">
+                  <div class="vpl_badge {{ 'ok' if t.passed else 'fail' }}">
+                    {{ '✓ הצלחה' if t.passed else '✗ אי-הצלחה' }}
+                  </div>
+                  <div class="vpl_name">{{ t.name }}</div>
+                </div>
+
+                {% if (not t.passed) and t.feedback_text %}
+                  <div class="vpl_testSummary fail">{{ t.feedback_text }}</div>
+                {% endif %}
+              </div>
+
+              <button class="chev" data-toggle="details_{{ t.id }}">▾</button>
+            </div>
+
+            <!-- Collapsible details -->
+            <div class="vpl_details" id="details_{{ t.id }}">
+              <div class="vpl_boxTitle">תיאור הבדיקה</div>
+              <div class="vpl_hint">{{ t.description }}</div>
+
+              <div class="vpl_boxTitle">תוצאות הרצה</div>
+              <div class="vpl_tableWrap">
+                <table class="logTable">
+                  <tbody>
+                    {% for line in t.lines %}
+  <tr class="{% if loop.first %}first-row{% endif %}{% if loop.last %} last-row{% endif %}">
+    <td class="cell-log-text" dir="ltr">
+      <div class="vpl_terminal-line-wrap">
+        {% if loop.first %}
+          <div class="vpl_terminal-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+        {% endif %}
+        <pre>{{ line.text }}</pre>
+      </div>
+    </td>
+
+    <td class="cell-log-anno">
+      {% if line.anno %}
+        <div class="vpl_anno-interactive-wrapper">
+          <span class="anno-icon" data-anno="1"><strong>ⓘ</strong></span>
+          <span class="tooltip-content"><strong>{{ line.anno_kind }} </strong>{{ line.anno_name }}</span>
+        </div>
+      {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="vpl_foot">{{ footer_text }}</div>
+    </div>
+  </div>

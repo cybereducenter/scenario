@@ -18,7 +18,10 @@ from scenario.consts import VERBOSITY,      \
 
 from scenario.utils import build_feedback_text
 
-__version__ = "1.2.3"
+COMMENT_PREFIX = "Comment ==> "
+GRADE_PREFIX = "Grade ==> "
+
+__version__ = "1.2.4"
 
 def main():
 
@@ -129,7 +132,13 @@ def main():
         print(feedback_text)
 
     elif args.format == 'html':
-        print(reporter_generate_html(feedback_list))
+        grade, html_string = reporter_generate_html(feedback_list)
+        print(html_string)
+    
+    elif args.format == 'vpl_html':
+        grade, html_string = reporter_generate_html(feedback_list, format_type="vpl")
+        print(COMMENT_PREFIX + html_string.replace('\n', '').replace('\r', ''))
+        print(GRADE_PREFIX + grade)
     
     if args.forward_signal and signal_ is not None:
         os.kill(os.getpid(), signal_)

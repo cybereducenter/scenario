@@ -31,7 +31,7 @@ VERBOSITY = OrderedDict(
      ('DEBUG', 5),
      ])
 
-OUTPUT_FORMATS = ['json', 'text', 'html']
+OUTPUT_FORMATS = ['json', 'text', 'html', 'vpl_html']
 
 OUTPUT_FORMATS_DEFAULT = 'text'
 
