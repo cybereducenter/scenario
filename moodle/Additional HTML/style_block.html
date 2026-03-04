@@ -1,0 +1,406 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap');
+
+    .moodle-report-wrap {
+        --vpl-color-primary: #000047;
+        --vpl-color-accent: #FFC400;
+        --vpl-color-background: #FFFFFF;
+        --vpl-color-border: #BFC5D9;
+        --vpl-color-bg-light: #F5F5F5;
+        --vpl-color-bg-success: #E7F8F2;
+        --vpl-color-bg-conditional: #FDF9E3;
+        --vpl-color-bg-fail: #FDEBEB;
+        --vpl-color-text-hint: #6B7280;
+        --vpl-terminal-header-color: #E5E7EB;
+        --vpl-terminal-bg: #3C3C3C;
+
+        --vpl-shadow-card: 0px 2px 4px -2px rgba(0, 19, 68, 0.1), 0px 4px 6px -1px rgba(0, 19, 68, 0.1);
+        --vpl-radius-main: 30px;
+        --vpl-radius-card: 12px;
+
+        --vpl-font-main: 'Noto Sans Hebrew', sans-serif;
+
+        font-family: var(--vpl-font-main);
+        color: var(--vpl-color-primary);
+        line-height: 1.5;
+        text-align: right;
+    }
+
+    .moodle-report-wrap * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .moodle-report-wrap .vpl-wrap {
+        background: var(--vpl-color-background);
+        width: 100%;
+        max-width: 900px;
+        border-radius: var(--vpl-radius-main);
+        box-shadow: var(--vpl-shadow-card);
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        overflow: visible;
+        margin: 20px auto;
+    }
+
+    .moodle-report-wrap .vpl-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .moodle-report-wrap .vpl-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .moodle-report-wrap .vpl-sub {
+        font-size: 17px;
+        font-weight: 400;
+    }
+
+    /* Score */
+    .moodle-report-wrap .vpl-scoreBox {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .moodle-report-wrap .vpl-scorePercent {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--vpl-color-primary);
+        width: 120px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--vpl-radius-card);
+    }
+
+    .moodle-report-wrap .vpl-scoreLabel {
+        font-size: 15px;
+        font-weight: 400;
+    }
+
+    .moodle-report-wrap .vpl-scorePercent.vpl-score-red {
+        background: var(--vpl-color-bg-fail);
+    }
+
+    .moodle-report-wrap .vpl-scorePercent.vpl-score-yellow {
+        background: var(--vpl-color-bg-conditional);
+    }
+
+    .moodle-report-wrap .vpl-scorePercent.vpl-score-green {
+        background: var(--vpl-color-bg-success);
+    }
+
+    /* Section Title */
+    .moodle-report-wrap .vpl-sectionTitle {
+        font-size: 17px;
+        font-weight: 700;
+        border-bottom: 2px solid var(--vpl-color-bg-light);
+        padding-bottom: 8px;
+        margin-top: 10px;
+    }
+
+    .moodle-report-wrap .vpl-tests {
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    .moodle-report-wrap .vpl-test {
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        border: 1px solid var(--vpl-color-border);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: visible;
+    }
+
+    .moodle-report-wrap .vpl-test>.vpl-row {
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        background: var(--vpl-color-background);
+        border-radius: 10px 10px 0 0;
+    }
+
+    .moodle-report-wrap .vpl-test>.vpl-row:hover {
+        background: var(--vpl-color-bg-light);
+    }
+
+    /* Badge Styling */
+    .moodle-report-wrap .vpl-badge {
+        padding: 4px 12px;
+        border-radius: 100px;
+        font-size: 14px;
+        font-weight: 400;
+        white-space: nowrap;
+        width: 100px;
+        flex-shrink: 0;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .moodle-report-wrap .vpl-badge.vpl-ok {
+        background: var(--vpl-color-bg-success);
+    }
+
+    .moodle-report-wrap .vpl-badge.vpl-fail {
+        background: var(--vpl-color-bg-fail);
+    }
+
+    .moodle-report-wrap .vpl-test-header-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .moodle-report-wrap .vpl-testMain {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .moodle-report-wrap .vpl-name {
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .moodle-report-wrap .vpl-hint {
+        font-size: 15px;
+    }
+
+    .moodle-report-wrap .vpl-chev {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: var(--vpl-color-primary);
+        cursor: pointer;
+        padding: 4px;
+        transition: transform 0.2s ease;
+    }
+
+    /* Details Section */
+    .moodle-report-wrap .vpl-details {
+        display: none;
+        padding: 0 20px 20px;
+        background: var(--vpl-color-background);
+        border-radius: 0 0 10px 10px;
+    }
+
+    .moodle-report-wrap .vpl-test:hover .vpl-details {
+        display: block;
+    }
+
+    .moodle-report-wrap .vpl-test:hover .vpl-chev {
+        transform: rotate(180deg);
+    }
+
+    .moodle-report-wrap .vpl-boxTitle {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 16px 0 8px;
+    }
+
+    /* Terminal Mockup Style */
+    .moodle-report-wrap .vpl-tableWrap {
+        padding-bottom: 24px;
+    }
+
+    .moodle-report-wrap .vpl-terminal-line-wrap {
+        background: var(--vpl-terminal-bg);
+        position: relative;
+    }
+
+    .moodle-report-wrap .vpl-first-row .vpl-terminal-line-wrap {
+        border-radius: 12px 12px 0 0;
+    }
+
+    .moodle-report-wrap .vpl-last-row .vpl-terminal-line-wrap {
+        border-radius: 0 0 12px 12px;
+    }
+
+    .moodle-report-wrap .vpl-terminal-header {
+        background: var(--vpl-terminal-header-color);
+        height: 32px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    .moodle-report-wrap .vpl-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .moodle-report-wrap .vpl-dot.vpl-red {
+        background: #FF5F56;
+    }
+
+    .moodle-report-wrap .vpl-dot.vpl-yellow {
+        background: #FFBD2E;
+    }
+
+    .moodle-report-wrap .vpl-dot.vpl-green {
+        background: #27C93F;
+    }
+
+    .moodle-report-wrap .vpl-logTable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .moodle-report-wrap .vpl-cell-log-text {
+        padding: 0;
+    }
+
+    .moodle-report-wrap .vpl-cell-log-text pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 100%;
+        letter-spacing: 0;
+        background: transparent;
+        color: var(--vpl-color-bg-light);
+        padding: 8px 12px;
+        display: block;
+        text-align: left;
+    }
+
+    .moodle-report-wrap .vpl-logTable td {
+        vertical-align: top;
+    }
+
+    .moodle-report-wrap .vpl-cell-log-anno {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 8px;
+        padding-right: 10px;
+    }
+
+    .moodle-report-wrap .vpl-first-row .vpl-cell-log-anno {
+        padding-top: 40px;
+    }
+
+    .moodle-report-wrap .vpl-anno-interactive-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .moodle-report-wrap .vpl-tooltip-content {
+        display: none;
+        position: absolute;
+        right: calc(100% + 12px);
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 100px;
+        padding: 10px 14px;
+        background: var(--vpl-color-background);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--vpl-color-border);
+        font-size: 10px;
+        line-height: 1.4;
+        z-index: 100;
+        font-style: normal;
+        text-align: right;
+    }
+
+    .moodle-report-wrap .vpl-anno-interactive-wrapper:hover .vpl-tooltip-content {
+        display: block;
+    }
+
+    /* Speech bubble arrow */
+    .moodle-report-wrap .vpl-tooltip-content::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -16px;
+        transform: translateY(-50%);
+        border-width: 8px;
+        border-style: solid;
+        border-color: transparent transparent transparent white;
+    }
+
+    .moodle-report-wrap .vpl-tooltip-content::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -18px;
+        transform: translateY(-50%);
+        border-width: 9px;
+        border-style: solid;
+        border-color: transparent transparent transparent var(--vpl-color-border);
+    }
+
+    .moodle-report-wrap .vpl-anno-icon {
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        border: 1px solid var(--vpl-color-border);
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .moodle-report-wrap .vpl-anno-icon:hover {
+        background: var(--vpl-color-accent);
+        color: var(--vpl-color-primary);
+        border-color: var(--vpl-color-accent);
+    }
+
+    /* Summary Box in Details */
+    .moodle-report-wrap .vpl-testSummary {
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 400;
+        margin-top: 10px;
+        text-align: right;
+    }
+
+    .moodle-report-wrap .vpl-testSummary.vpl-fail {
+        background: var(--vpl-color-bg-fail);
+    }
+
+    .moodle-report-wrap .vpl-testMain .vpl-testSummary {
+        margin-right: 112px;
+        padding: 0;
+        background: none;
+    }
+
+    /* Footer */
+    .moodle-report-wrap .vpl-foot {
+        text-align: center;
+        font-size: 14px;
+        color: var(--vpl-color-text-hint);
+        margin-top: 20px;
+    }
+</style>

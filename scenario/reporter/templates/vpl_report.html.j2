@@ -11,8 +11,11 @@
       </div>
 
       <!-- Score indicator -->
-      <div class="vpl-scoreIndicator">
-        {% for tests in tests%} {{'🟨' if tests.passed else '⬜'}}{% endfor %} {{score_percent}}% ({{passed}}/{{total}})
+      <div class="vpl-scoreBox">
+        <div
+          class="vpl-scorePercent {% if score_percent == 100 %}vpl-score-green{% elif score_percent > 25 %}vpl-score-yellow{% else %}vpl-score-red{% endif %}">
+          {{ score_percent }}%</div>
+        <div class="vpl-scoreLabel">{{ passed }}/{{ total }} תרחישים עברו</div>
       </div>
     </div>
 
