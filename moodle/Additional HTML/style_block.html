@@ -116,7 +116,8 @@
         overflow: visible;
     }
 
-    .moodle-report-wrap .vpl-test {
+    /* Test card — now a <details> element */
+    .moodle-report-wrap details.vpl-test {
         transition: all 0.2s ease;
         box-sizing: border-box;
         border: 1px solid var(--vpl-color-border);
@@ -125,18 +126,44 @@
         overflow: visible;
     }
 
-    .moodle-report-wrap .vpl-test>.vpl-row {
+    /* Summary row — replaces the old .vpl-row click area */
+    .moodle-report-wrap details.vpl-test>summary.vpl-row {
         padding: 16px 20px;
         display: flex;
         align-items: center;
         gap: 16px;
         cursor: pointer;
         background: var(--vpl-color-background);
-        border-radius: 10px 10px 10px 10px;
+        border-radius: 10px;
+        list-style: none;
     }
 
-    .moodle-report-wrap .vpl-test>.vpl-row:hover {
+    /* Hide native disclosure marker */
+    .moodle-report-wrap details.vpl-test>summary.vpl-row::-webkit-details-marker {
+        display: none;
+    }
+
+    .moodle-report-wrap details.vpl-test>summary.vpl-row::marker {
+        display: none;
+        content: "";
+    }
+
+    .moodle-report-wrap details.vpl-test>summary.vpl-row:hover {
         background: var(--vpl-color-bg-light);
+    }
+
+    /* Chevron indicator — now a <span> */
+    .moodle-report-wrap .vpl-chev {
+        font-size: 18px;
+        color: var(--vpl-color-primary);
+        padding: 4px;
+        transition: transform 0.2s ease;
+        user-select: none;
+    }
+
+    /* Rotate chevron when open */
+    .moodle-report-wrap details[open]>summary .vpl-chev {
+        transform: rotate(180deg);
     }
 
     /* Badge Styling */
@@ -184,30 +211,11 @@
         font-size: 15px;
     }
 
-    .moodle-report-wrap .vpl-chev {
-        background: none;
-        border: none;
-        font-size: 18px;
-        color: var(--vpl-color-primary);
-        cursor: pointer;
-        padding: 4px;
-        transition: transform 0.2s ease;
-    }
-
-    /* Details Section */
+    /* Details Section — shown when <details> is open */
     .moodle-report-wrap .vpl-details {
-        display: none;
         padding: 0 20px 20px;
         background: var(--vpl-color-background);
         border-radius: 0 0 10px 10px;
-    }
-
-    .moodle-report-wrap .vpl-test:hover .vpl-details {
-        display: block;
-    }
-
-    .moodle-report-wrap .vpl-test:hover .vpl-chev {
-        transform: rotate(180deg);
     }
 
     .moodle-report-wrap .vpl-boxTitle {
@@ -303,15 +311,44 @@
         padding-top: 40px;
     }
 
-    .moodle-report-wrap .vpl-anno-interactive-wrapper {
+    /* Annotation tooltip — now a mini <details> element */
+    .moodle-report-wrap .vpl-anno-details {
         position: relative;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+    }
+
+    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon {
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 100%;
+        border: 1px solid var(--vpl-color-border);
+        transition: all 0.2s ease;
+        user-select: none;
+        list-style: none;
+    }
+
+    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::-webkit-details-marker {
+        display: none;
+    }
+
+    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::marker {
+        display: none;
+        content: "";
+    }
+
+    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon:hover {
+        background: var(--vpl-color-accent);
+        color: var(--vpl-color-primary);
+        border-color: var(--vpl-color-accent);
     }
 
     .moodle-report-wrap .vpl-tooltip-content {
-        display: none;
         position: absolute;
         right: calc(100% + 12px);
         top: 50%;
@@ -327,53 +364,6 @@
         z-index: 100;
         font-style: normal;
         text-align: right;
-    }
-
-    .moodle-report-wrap .vpl-anno-interactive-wrapper:hover .vpl-tooltip-content {
-        display: block;
-    }
-
-    /* Speech bubble arrow */
-    .moodle-report-wrap .vpl-tooltip-content::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        right: -16px;
-        transform: translateY(-50%);
-        border-width: 8px;
-        border-style: solid;
-        border-color: transparent transparent transparent white;
-    }
-
-    .moodle-report-wrap .vpl-tooltip-content::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        right: -18px;
-        transform: translateY(-50%);
-        border-width: 9px;
-        border-style: solid;
-        border-color: transparent transparent transparent var(--vpl-color-border);
-    }
-
-    .moodle-report-wrap .vpl-anno-icon {
-        cursor: pointer;
-        font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 100%;
-        border: 1px solid var(--vpl-color-border);
-        transition: all 0.2s ease;
-        user-select: none;
-    }
-
-    .moodle-report-wrap .vpl-anno-icon:hover {
-        background: var(--vpl-color-accent);
-        color: var(--vpl-color-primary);
-        border-color: var(--vpl-color-accent);
     }
 
     /* Summary Box in Details */

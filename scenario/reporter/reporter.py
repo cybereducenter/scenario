@@ -50,7 +50,7 @@ def reporter_generate_html(
     title_text: str = "תוצאות הבדיקה",
     subtitle_text: str = "",
     section_title: str = "פירוט תרחישי הבדיקה",
-    footer_text: str = "העבירו את העכבר על התרחיש לקבלת פרטים נוספים",
+    footer_text: str = "לחצו על התרחיש לקבלת פרטים נוספים",
 ) -> str:
 
     def _strip_newlines(s: str) -> str:

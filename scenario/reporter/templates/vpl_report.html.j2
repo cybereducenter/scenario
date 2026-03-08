@@ -25,10 +25,8 @@
     <!-- Loop over tests -->
     <div class="vpl-tests">
       {% for t in tests %}
-      <div class="vpl-test">
-        <div class="vpl-row">
-
-          <!-- Collapsible header -->
+      <details class="vpl-test">
+        <summary class="vpl-row">
           <div class="vpl-testMain">
             <div class="vpl-test-header-row">
               <div class="vpl-badge {{ 'vpl-ok' if t.passed else 'vpl-fail' }}">
@@ -42,8 +40,8 @@
             {% endif %}
           </div>
 
-          <button class="vpl-chev">▾</button>
-        </div>
+          <span class="vpl-chev">▾</span>
+        </summary>
 
         <!-- Collapsible details -->
         <div class="vpl-details">
@@ -71,10 +69,10 @@
 
                   <td class="vpl-cell-log-anno">
                     {% if line.anno %}
-                    <div class="vpl-anno-interactive-wrapper">
-                      <span class="vpl-anno-icon"><strong>ⓘ</strong></span>
-                      <span class="vpl-tooltip-content"><strong>{{ line.anno_kind }} </strong>{{ line.anno_name}}</span>
-                    </div>
+                    <details class="vpl-anno-details">
+                      <summary class="vpl-anno-icon"><b>ⓘ</b></summary>
+                      <div class="vpl-tooltip-content"><b>{{ line.anno_kind }} </b>{{ line.anno_name }}</div>
+                    </details>
                     {% endif %}
                   </td>
                 </tr>
@@ -85,7 +83,7 @@
           </div>
         </div>
 
-      </div>
+      </details>
       {% endfor %}
     </div>
 
