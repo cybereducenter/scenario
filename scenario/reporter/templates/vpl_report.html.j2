@@ -9,13 +9,23 @@
         <div class="vpl-sub">{{ subtitle_text }}</div>
         {% endif %}
       </div>
-    </div>
 
-      <!-- Score indicator -->
-      <div class="vpl-scoreBox">
-        <div
-          class="vpl-scorePercent {% if score_percent == 100 %}vpl-score-green{% elif score_percent > 25 %}vpl-score-yellow{% else %}vpl-score-red{% endif %}">
-          {{ score_percent }}%</div>
+      <!-- Gauge score -->
+      <div class="vpl-scoreContainer">
+        <div class="vpl-scoreBox">
+          <svg width="118" height="59">
+            {% if score_percent == 100 %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="{{ gauge_color }}" style="stroke-width:24" />
+            {% elif score_percent == 0 %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="#D3D3DB" style="stroke-width:24" />
+            {% else %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="#D3D3DB" style="stroke-width:24" />
+            <path d="M 14 58 A 45 45 0 {{ gauge_large_arc }} 1 {{ gauge_end_x }} {{ gauge_end_y }}" fill="none"
+              stroke="{{ gauge_color }}" style="stroke-width:24" />
+            {% endif %}
+          </svg>
+          <div class="vpl-gauge-text">{{ score_percent }}%</div>
+        </div>
         <div class="vpl-scoreLabel">{{ passed }}/{{ total }} תרחישים עברו</div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -166,15 +167,28 @@ def reporter_generate_html(
 
     score_percent = int(round((passed_count / total) * 100)) if total else 0
 
-    # SVG gauge uses "stroke-dashoffset" where 0 = 100% filled
-    gauge_dashoffset = max(0, min(100, 100 - score_percent))
-
+    # Gauge color
     if score_percent == 100:
-      gauge_color = "#10B981"   # green
+        gauge_color = "#23C48E"   # green
     elif score_percent == 0:
-      gauge_color = "#EF4444"   # red
+        gauge_color = "#E94F4B"   # red
     else:
-      gauge_color = "#FFC400"   # yellow
+        gauge_color = "#ECC503"   # yellow
+
+    # SVG gauge arc endpoint calculation
+    # The gauge is a semicircle from (14,58) to (104,58)
+    # center=(59,58), radius=45
+    # At 0%   the arc start is at 180° (leftmost point)
+    # At 100% the arc end   is at   0° (rightmost point)
+    gauge_end_x = 0.0
+    gauge_end_y = 0.0
+    gauge_large_arc = 0  # always 0 — full gauge is 180° so any portion is ≤ 180°
+
+    if 0 < score_percent < 100:
+        angle_deg = 180.0 - (score_percent * 1.8)
+        angle_rad = math.radians(angle_deg)
+        gauge_end_x = round(59.0 + 45.0 * math.cos(angle_rad), 1)
+        gauge_end_y = round(58.0 - 45.0 * math.sin(angle_rad), 1)
 
 
     # ============================================================
@@ -208,7 +222,9 @@ def reporter_generate_html(
         passed=passed_count,
         score_percent=score_percent,
         gauge_color=gauge_color,
-        gauge_dashoffset=gauge_dashoffset,
+        gauge_end_x=gauge_end_x,
+        gauge_end_y=gauge_end_y,
+        gauge_large_arc=gauge_large_arc,
     )
 
     return score_percent, html

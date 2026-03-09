@@ -38,7 +38,7 @@
         max-width: 900px;
         border-radius: var(--vpl-radius-main);
         box-shadow: var(--vpl-shadow-card);
-        padding: 0;
+        padding: 40px;
         display: flex;
         flex-direction: column;
         gap: 24px;
@@ -64,41 +64,38 @@
         font-weight: 400;
     }
 
-    /* Score */
-    .moodle-report-wrap .vpl-scoreBox {
+    /* Gauge Score */
+    .moodle-report-wrap .vpl-scoreContainer {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 6px;
     }
 
-    .moodle-report-wrap .vpl-scorePercent {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--vpl-color-primary);
-        width: 120px;
-        height: 56px;
+    .moodle-report-wrap .vpl-scoreBox {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: var(--vpl-radius-card);
+    }
+
+    .moodle-report-wrap .vpl-scoreBox svg {
+        display: block;
+    }
+
+    .moodle-report-wrap .vpl-gauge-text {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--vpl-color-primary);
     }
 
     .moodle-report-wrap .vpl-scoreLabel {
         font-size: 15px;
         font-weight: 400;
-    }
-
-    .moodle-report-wrap .vpl-scorePercent.vpl-score-red {
-        background: var(--vpl-color-bg-fail);
-    }
-
-    .moodle-report-wrap .vpl-scorePercent.vpl-score-yellow {
-        background: var(--vpl-color-bg-conditional);
-    }
-
-    .moodle-report-wrap .vpl-scorePercent.vpl-score-green {
-        background: var(--vpl-color-bg-success);
     }
 
     /* Section Title */
