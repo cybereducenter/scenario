@@ -137,25 +137,58 @@ def reporter_generate_html(
 
     render_tests: list[RenderTest] = []
 
-    for t in tests_data:
-        test_id = str(t.get("id", "unknown"))
-        name = str(t.get("name", ""))
-        description = str(t.get("description", ""))
-        passed = bool((t.get("result") or {}).get("bool", False))
-        feedback_text = str(((t.get("feedback") or {}).get("text")) or "")
+    # Unittest
+    if tests_data and "method_signature" in tests_data[0]:
+        for t in tests_data:
+            test_id = str(t.get("id", "unknown"))
+            name = str(t.get("name", ""))
+            description = str(t.get("description", ""))
+            passed = bool((t.get("result") or {}).get("bool", False))
+            
+            if passed:
+                feedback_text = ""
+            else:
+                feedback_text = str(((t.get("feedback") or {}).get("error")) or "")
 
-        quotes = ((t.get("log") or {}).get("quotes")) or []
+            one_line = []
+            one_line.append(RenderLine(
+                            text=((t.get("log") or {}).get("text")) or [],
+                            anno=False,
+                            anno_kind="",
+                            anno_name="",
+                        ))
 
-        render_tests.append(
-            RenderTest(
-                id=test_id,
-                name=name,
-                description=description,
-                passed=passed,
-                feedback_text=feedback_text,
-                lines=_merge_quotes_to_lines(quotes),
+            render_tests.append(
+                RenderTest(
+                    id=test_id,
+                    name=name,
+                    description=description,
+                    passed=passed,
+                    feedback_text=feedback_text,
+                    lines=one_line,
+                )
             )
-        )
+    # Scenario
+    else:
+        for t in tests_data:
+            test_id = str(t.get("id", "unknown"))
+            name = str(t.get("name", ""))
+            description = str(t.get("description", ""))
+            passed = bool((t.get("result") or {}).get("bool", False))
+            feedback_text = str(((t.get("feedback") or {}).get("text")) or "")
+
+            quotes = ((t.get("log") or {}).get("quotes")) or []
+
+            render_tests.append(
+                RenderTest(
+                    id=test_id,
+                    name=name,
+                    description=description,
+                    passed=passed,
+                    feedback_text=feedback_text,
+                    lines=_merge_quotes_to_lines(quotes),
+                )
+            )
 
     # ============================================================
     # Compute summary statistics (for the gauge)
