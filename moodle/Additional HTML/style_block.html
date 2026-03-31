@@ -1,393 +1,537 @@
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap');
 
-    .moodle-report-wrap {
-        --vpl-color-primary: #000047;
-        --vpl-color-accent: #FFC400;
-        --vpl-color-background: #FFFFFF;
-        --vpl-color-border: #BFC5D9;
-        --vpl-color-bg-light: #F5F5F5;
-        --vpl-color-bg-success: #E7F8F2;
-        --vpl-color-bg-conditional: #FDF9E3;
-        --vpl-color-bg-fail: #FDEBEB;
-        --vpl-color-text-hint: #6B7280;
-        --vpl-terminal-header-color: #E5E7EB;
-        --vpl-terminal-bg: #3C3C3C;
+/* ============================================================
+   VPL Integration — Moodle Overrides
+   Adjusts native Moodle/VPL elements: outcome box appearance,
+   default titles, and dialog directionality.
+   ============================================================ */
 
-        --vpl-shadow-card: 0px 2px 4px -2px rgba(0, 19, 68, 0.1), 0px 4px 6px -1px rgba(0, 19, 68, 0.1);
-        --vpl-radius-main: 30px;
-        --vpl-radius-card: 12px;
+/* Match outcome box background to the formulation box */
+.outcome.clearfix {
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
 
-        --vpl-font-main: 'Noto Sans Hebrew', sans-serif;
+/* Hide the outcome-specific feedback heading */
+.outcome .specificfeedback .mt-1 h5 {
+  display: none !important;
+}
 
-        font-family: var(--vpl-font-main);
-        color: var(--vpl-color-primary);
-        line-height: 1.5;
-        text-align: right;
-    }
+/* Hide the default VPL result title */
+.vpl-result-title {
+    display: none !important;
+}
 
-    .moodle-report-wrap * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+/* Force LTR layout on VPL VNC dialogs (run mode unused) */
+.ui-dialog.vpl_ide.vpl_vnc {
+    direction: ltr !important;
+    text-align: left !important;
+}
 
-    .moodle-report-wrap .vpl-wrap {
-        background: var(--vpl-color-background);
-        width: 100%;
-        max-width: 900px;
-        border-radius: var(--vpl-radius-main);
-        box-shadow: var(--vpl-shadow-card);
-        padding: 40px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        overflow: visible;
-        margin: 20px auto;
-    }
+/* ============================================================
+   Compilation Error Box
+   Styled container for compiler output shown on build failure.
+   ============================================================ */
 
-    .moodle-report-wrap .vpl-topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-    }
+.vpl-compile-box {
+  direction: rtl;
+  text-align: right;
 
-    .moodle-report-wrap .vpl-title {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
+  padding: 0 16px;
 
-    .moodle-report-wrap .vpl-sub {
-        font-size: 17px;
-        font-weight: 400;
-    }
+  border-radius: 10px;
 
-    /* Gauge Score */
-    .moodle-report-wrap .vpl-scoreContainer {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-    }
+  color: red;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-    .moodle-report-wrap .vpl-scoreBox {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+/* Error heading */
+.vpl-compile-title {
+  font-weight: 600;
+  font-size: 0.95rem;
 
-    .moodle-report-wrap .vpl-scoreBox svg {
-        display: block;
-    }
+  margin-bottom: 10px;
+}
 
-    .moodle-report-wrap .vpl-gauge-text {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--vpl-color-primary);
-    }
+/* Compiler output code block — dark theme, monospace */
+.vpl-compile-log {
+  direction: ltr;
+  text-align: left;
 
-    .moodle-report-wrap .vpl-scoreLabel {
-        font-size: 15px;
-        font-weight: 400;
-    }
+  margin: 0;
+  padding: 12px 14px;
 
-    /* Section Title */
-    .moodle-report-wrap .vpl-sectionTitle {
-        font-size: 17px;
-        font-weight: 700;
-        border-bottom: 2px solid var(--vpl-color-bg-light);
-        padding-bottom: 8px;
-        margin-top: 10px;
-    }
+  border-radius: 8px;
+  border: 1px solid #ead0d0;
 
-    .moodle-report-wrap .vpl-tests {
-        display: flex;
-        flex-direction: column;
-        overflow: visible;
-    }
+  background: #1e1e1e;
+  color: red;
 
-    /* Test card — now a <details> element */
-    .moodle-report-wrap details.vpl-test {
-        transition: all 0.2s ease;
-        box-sizing: border-box;
-        border: 1px solid var(--vpl-color-border);
-        border-radius: 10px;
-        margin-bottom: 12px;
-        overflow: visible;
-    }
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.45;
 
-    /* Summary row — replaces the old .vpl-row click area */
-    .moodle-report-wrap details.vpl-test>summary.vpl-row {
-        padding: 16px 20px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        cursor: pointer;
-        background: var(--vpl-color-background);
-        border-radius: 10px;
-        list-style: none;
-    }
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
 
-    /* Hide native disclosure marker */
-    .moodle-report-wrap details.vpl-test>summary.vpl-row::-webkit-details-marker {
-        display: none;
-    }
+/* ============================================================
+   Report Container — Design Tokens & Base Styles
+   Root wrapper that defines the design-system variables
+   (colors, shadows, radii, typography) for all report content.
+   ============================================================ */
 
-    .moodle-report-wrap details.vpl-test>summary.vpl-row::marker {
-        display: none;
-        content: "";
-    }
+.moodle-report-wrap {
+    --vpl-color-primary: #000047;
+    --vpl-color-accent: #FFC400;
+    --vpl-color-background: #FFFFFF;
+    --vpl-color-border: #BFC5D9;
+    --vpl-color-bg-light: #F5F5F5;
+    --vpl-color-bg-success: #E7F8F2;
+    --vpl-color-bg-conditional: #FDF9E3;
+    --vpl-color-bg-fail: #FDEBEB;
+    --vpl-color-text-hint: #6B7280;
+    --vpl-terminal-header-color: #E5E7EB;
+    --vpl-terminal-bg: #3C3C3C;
 
-    .moodle-report-wrap details.vpl-test>summary.vpl-row:hover {
-        background: var(--vpl-color-bg-light);
-    }
+    --vpl-radius-main: 30px;
+    --vpl-radius-card: 12px;
 
-    /* Chevron indicator — now a <span> */
-    .moodle-report-wrap .vpl-chev {
-        font-size: 18px;
-        color: var(--vpl-color-primary);
-        padding: 4px;
-        transition: transform 0.2s ease;
-        user-select: none;
-    }
+    --vpl-font-main: 'Noto Sans Hebrew', sans-serif
 
-    /* Rotate chevron when open */
-    .moodle-report-wrap details[open]>summary .vpl-chev {
-        transform: rotate(180deg);
-    }
+    font-family: var(--vpl-font-main);
+    color: var(--vpl-color-primary);
+    line-height: 1.5;
+    text-align: right;
+}
 
-    /* Badge Styling */
-    .moodle-report-wrap .vpl-badge {
-        padding: 4px 12px;
-        border-radius: 100px;
-        font-size: 14px;
-        font-weight: 400;
-        white-space: nowrap;
-        width: 100px;
-        flex-shrink: 0;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        gap: 6px;
-    }
+/* Global box-model reset scoped to the report */
+.moodle-report-wrap * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    .moodle-report-wrap .vpl-badge.vpl-ok {
-        background: var(--vpl-color-bg-success);
-    }
+/* ============================================================
+   Report Layout
+   Main card wrapper and top-bar (title + score area).
+   ============================================================ */
 
-    .moodle-report-wrap .vpl-badge.vpl-fail {
-        background: var(--vpl-color-bg-fail);
-    }
+.moodle-report-wrap .vpl-wrap {
+    background: var(--vpl-color-background);
+    width: 100%;
+    max-width: 900px;
+    border-radius: var(--vpl-radius-main);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow: visible;
+    margin: auto;
+}
 
-    .moodle-report-wrap .vpl-test-header-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
+/* Top bar — title on one side, score gauge on the other */
+.moodle-report-wrap .vpl-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
 
-    .moodle-report-wrap .vpl-testMain {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
+.moodle-report-wrap .vpl-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
 
-    .moodle-report-wrap .vpl-name {
-        font-size: 17px;
-        font-weight: 700;
-    }
+.moodle-report-wrap .vpl-sub {
+    font-size: 17px;
+    font-weight: 400;
+}
 
-    .moodle-report-wrap .vpl-hint {
-        font-size: 15px;
-    }
+/* ============================================================
+   Score Gauge
+   Semi-circle SVG gauge with centred percentage label.
+   ============================================================ */
 
-    /* Details Section — shown when <details> is open */
-    .moodle-report-wrap .vpl-details {
-        padding: 0 20px 20px;
-        background: var(--vpl-color-background);
-        border-radius: 0 0 10px 10px;
-    }
+.moodle-report-wrap .vpl-scoreContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
 
-    .moodle-report-wrap .vpl-boxTitle {
-        font-size: 15px;
-        font-weight: 700;
-        margin: 16px 0 8px;
-    }
+.moodle-report-wrap .vpl-scoreBox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    /* Terminal Mockup Style */
-    .moodle-report-wrap .vpl-tableWrap {
-        padding-bottom: 24px;
-    }
+.moodle-report-wrap .vpl-scoreBox svg {
+    display: block;
+}
 
-    .moodle-report-wrap .vpl-terminal-line-wrap {
-        background: var(--vpl-terminal-bg);
-        position: relative;
-    }
+.moodle-report-wrap .vpl-gauge-text {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--vpl-color-primary);
+}
 
-    .moodle-report-wrap .vpl-first-row .vpl-terminal-line-wrap {
-        border-radius: 12px 12px 0 0;
-    }
+.moodle-report-wrap .vpl-scoreLabel {
+    font-size: 15px;
+    font-weight: 400;
+}
 
-    .moodle-report-wrap .vpl-last-row .vpl-terminal-line-wrap {
-        border-radius: 0 0 12px 12px;
-    }
+/* ============================================================
+   Section Title
+   Underlined heading that separates logical report sections.
+   ============================================================ */
 
-    .moodle-report-wrap .vpl-terminal-header {
-        background: var(--vpl-terminal-header-color);
-        height: 32px;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        align-items: center;
-        padding: 0 12px;
-        gap: 8px;
-    }
+.moodle-report-wrap .vpl-sectionTitle {
+    font-size: 17px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--vpl-color-bg-light);
+    padding-bottom: 8px;
+    margin-top: 10px;
+}
 
-    .moodle-report-wrap .vpl-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-    }
+/* ============================================================
+   Test Cards (<details> / <summary>)
+   Collapsible cards for individual test results.
+   ============================================================ */
 
-    .moodle-report-wrap .vpl-dot.vpl-red {
-        background: #FF5F56;
-    }
+.moodle-report-wrap .vpl-tests {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
 
-    .moodle-report-wrap .vpl-dot.vpl-yellow {
-        background: #FFBD2E;
-    }
+/* Card container */
+.moodle-report-wrap details.vpl-test {
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    border: 1px solid var(--vpl-color-border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: visible;
+}
 
-    .moodle-report-wrap .vpl-dot.vpl-green {
-        background: #27C93F;
-    }
+/* Summary row — clickable header of each test card */
+.moodle-report-wrap details.vpl-test>summary.vpl-row {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    background: var(--vpl-color-background);
+    border-radius: 10px;
+    list-style: none;
+}
 
-    .moodle-report-wrap .vpl-logTable {
-        width: 100%;
-        border-collapse: collapse;
-    }
+/* Hide native disclosure markers across browsers */
+.moodle-report-wrap details.vpl-test>summary.vpl-row::-webkit-details-marker {
+    display: none;
+}
 
-    .moodle-report-wrap .vpl-cell-log-text {
-        padding: 0;
-    }
+.moodle-report-wrap details.vpl-test>summary.vpl-row::marker {
+    display: none;
+    content: "";
+}
 
-    .moodle-report-wrap .vpl-cell-log-text pre {
-        margin: 0;
-        white-space: pre-wrap;
-        word-break: break-all;
-        font-family: 'Roboto Mono', monospace;
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 100%;
-        letter-spacing: 0;
-        background: transparent;
-        color: var(--vpl-color-bg-light);
-        padding: 8px 12px;
-        display: block;
-        text-align: left;
-    }
+.moodle-report-wrap details.vpl-test>summary.vpl-row:hover {
+    background: var(--vpl-color-bg-light);
+}
 
-    .moodle-report-wrap .vpl-logTable td {
-        vertical-align: top;
-    }
+/* Chevron — rotates 180° when the card is open */
+.moodle-report-wrap .vpl-chev {
+    font-size: 18px;
+    color: var(--vpl-color-primary);
+    padding: 4px;
+    transition: transform 0.2s ease;
+    user-select: none;
+}
 
-    .moodle-report-wrap .vpl-cell-log-anno {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding-top: 8px;
-        padding-right: 10px;
-    }
+.moodle-report-wrap details[open]>summary .vpl-chev {
+    transform: rotate(180deg);
+}
 
-    .moodle-report-wrap .vpl-first-row .vpl-cell-log-anno {
-        padding-top: 40px;
-    }
+/* ============================================================
+   Status Badge
+   Pass / fail pill shown inline with the test name.
+   ============================================================ */
 
-    /* Annotation tooltip — now a mini <details> element */
-    .moodle-report-wrap .vpl-anno-details {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-    }
+.moodle-report-wrap .vpl-badge {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: nowrap;
+    width: 100px;
+    flex-shrink: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
 
-    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon {
-        cursor: pointer;
-        font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 100%;
-        border: 1px solid var(--vpl-color-border);
-        transition: all 0.2s ease;
-        user-select: none;
-        list-style: none;
-    }
+.moodle-report-wrap .vpl-badge.vpl-ok {
+    background: var(--vpl-color-bg-success);
+}
 
-    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::-webkit-details-marker {
-        display: none;
-    }
+.moodle-report-wrap .vpl-badge.vpl-fail {
+    background: var(--vpl-color-bg-fail);
+}
 
-    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::marker {
-        display: none;
-        content: "";
-    }
+/* ============================================================
+   Test Card Content
+   Name, hint, and header row inside each test card.
+   ============================================================ */
 
-    .moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon:hover {
-        background: var(--vpl-color-accent);
-        color: var(--vpl-color-primary);
-        border-color: var(--vpl-color-accent);
-    }
+.moodle-report-wrap .vpl-test-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-    .moodle-report-wrap .vpl-tooltip-content {
-        position: absolute;
-        right: calc(100% + 12px);
-        top: 50%;
-        transform: translateY(-50%);
-        min-width: 100px;
-        padding: 10px 14px;
-        background: var(--vpl-color-background);
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        border: 1px solid var(--vpl-color-border);
-        font-size: 10px;
-        line-height: 1.4;
-        z-index: 100;
-        font-style: normal;
-        text-align: right;
-    }
+.moodle-report-wrap .vpl-testMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
 
-    /* Summary Box in Details */
-    .moodle-report-wrap .vpl-testSummary {
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 400;
-        margin-top: 10px;
-        text-align: right;
-    }
+.moodle-report-wrap .vpl-name {
+    font-size: 17px;
+    font-weight: 700;
+}
 
-    .moodle-report-wrap .vpl-testSummary.vpl-fail {
-        background: var(--vpl-color-bg-fail);
-    }
+.moodle-report-wrap .vpl-hint {
+    font-size: 15px;
+}
 
-    .moodle-report-wrap .vpl-testMain .vpl-testSummary {
-        margin-right: 112px;
-        padding: 0;
-        background: none;
-    }
+/* ============================================================
+   Expanded Details Pane
+   Content revealed when a test <details> element is opened.
+   ============================================================ */
 
-    /* Footer */
-    .moodle-report-wrap .vpl-foot {
-        text-align: center;
-        font-size: 14px;
-        color: var(--vpl-color-text-hint);
-        margin-top: 20px;
-    }
+.moodle-report-wrap .vpl-details {
+    padding: 0 20px 20px;
+    background: var(--vpl-color-background);
+    border-radius: 0 0 10px 10px;
+}
+
+.moodle-report-wrap .vpl-boxTitle {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 16px 0 8px;
+}
+
+/* ============================================================
+   Terminal Mockup
+   macOS-style terminal window used to display expected vs
+   actual output. Includes a header bar with traffic-light dots.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-tableWrap {
+    padding-bottom: 24px;
+}
+
+.moodle-report-wrap .vpl-terminal-line-wrap {
+    background: var(--vpl-terminal-bg);
+    position: relative;
+}
+
+/* Rounded corners on first / last rows */
+.moodle-report-wrap .vpl-first-row .vpl-terminal-line-wrap {
+    border-radius: 12px 12px 0 0;
+}
+
+.moodle-report-wrap .vpl-last-row .vpl-terminal-line-wrap {
+    border-radius: 0 0 12px 12px;
+}
+
+/* Header bar with traffic-light dots */
+.moodle-report-wrap .vpl-terminal-header {
+    background: var(--vpl-terminal-header-color);
+    height: 32px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+}
+
+.moodle-report-wrap .vpl-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.moodle-report-wrap .vpl-dot.vpl-red {
+    background: #FF5F56;
+}
+
+.moodle-report-wrap .vpl-dot.vpl-yellow {
+    background: #FFBD2E;
+}
+
+.moodle-report-wrap .vpl-dot.vpl-green {
+    background: #27C93F;
+}
+
+/* ============================================================
+   Terminal Log Table
+   Table-based layout for I/O log lines inside the terminal.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-logTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.moodle-report-wrap .vpl-cell-log-text {
+    padding: 0;
+}
+
+/* Monospace preformatted log text */
+.moodle-report-wrap .vpl-cell-log-text pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: 0;
+    background: transparent;
+    color: var(--vpl-color-bg-light);
+    padding: 8px 12px;
+    display: block;
+    text-align: left;
+}
+
+.moodle-report-wrap .vpl-logTable td {
+    vertical-align: top;
+}
+
+/* ============================================================
+   Annotation Tooltips
+   Inline <details>-based icons that reveal tooltip content
+   positioned to the right of each log line.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-cell-log-anno {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    padding-right: 10px;
+}
+
+/* Extra top padding on the first row to clear the terminal header */
+.moodle-report-wrap .vpl-first-row .vpl-cell-log-anno {
+    padding-top: 40px;
+}
+
+/* Annotation toggle wrapper */
+.moodle-report-wrap .vpl-anno-details {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Circular icon trigger */
+.moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon {
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    border: 1px solid var(--vpl-color-border);
+    transition: all 0.2s ease;
+    user-select: none;
+    list-style: none;
+}
+
+/* Hide native markers */
+.moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::-webkit-details-marker {
+    display: none;
+}
+
+.moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon::marker {
+    display: none;
+    content: "";
+}
+
+.moodle-report-wrap .vpl-anno-details>summary.vpl-anno-icon:hover {
+    background: var(--vpl-color-accent);
+    color: var(--vpl-color-primary);
+    border-color: var(--vpl-color-accent);
+}
+
+/* Floating tooltip bubble */
+.moodle-report-wrap .vpl-tooltip-content {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 100px;
+    padding: 10px 14px;
+    background: var(--vpl-color-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--vpl-color-border);
+    font-size: 10px;
+    line-height: 1.4;
+    z-index: 100;
+    font-style: normal;
+    text-align: right;
+}
+
+/* ============================================================
+   Test Summary Box
+   Inline result summary shown within the expanded details pane.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-testSummary {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 400;
+    margin-top: 10px;
+    text-align: right;
+}
+
+.moodle-report-wrap .vpl-testSummary.vpl-fail {
+    background: var(--vpl-color-bg-fail);
+}
+
+/* Compact variant when nested inside the test header */
+.moodle-report-wrap .vpl-testMain .vpl-testSummary {
+    margin-right: 112px;
+    padding: 0;
+    background: none;
+}
+
+/* ============================================================
+   Footer
+   Centred, muted footer text at the bottom of the report.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-foot {
+    text-align: center;
+    font-size: 14px;
+    color: var(--vpl-color-text-hint);
+    margin-top: 20px;
+}
 </style>
