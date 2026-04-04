@@ -149,7 +149,11 @@ def reporter_generate_html(
             if passed:
                 feedback_text = ""
             else:
-                feedback_text = str(((t.get("feedback") or {}).get("error")) or "")
+                feedback_text = str(
+                    ((t.get("feedback") or {}).get("error"))
+                    or ((t.get("feedback") or {}).get("text"))
+                    or ""
+                )
 
             one_line = []
             one_line.append(RenderLine(

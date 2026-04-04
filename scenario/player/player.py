@@ -8,7 +8,9 @@ import pexpect
 import jsonschema
 
 from scenario.consts import FEEDBACK_JSON_SCHEMA, \
-    DELAY_BEFORE_SEND
+    DELAY_BEFORE_SEND, \
+    SCENARIO_LOG_MAX_TOTAL_CHARS, \
+    SCENARIO_LOG_MAX_CHUNK_CHARS
 
 from scenario.player.feedback_exceptions import SholdNoOutputBeforeInput, \
     ShouldEOF,                \
@@ -17,7 +19,8 @@ from scenario.player.feedback_exceptions import SholdNoOutputBeforeInput, \
     ShouldOutput,             \
     NegativeOutput,           \
     WriteToFileFailed,        \
-    MemoryFeedbackError
+    MemoryFeedbackError,      \
+    ScenarioTimeout
 
 from scenario.utils import xstr,  \
     get_cleaned_before,  \
@@ -43,11 +46,57 @@ def break_lines_log_quotes(feedback_log_quotes):
     return new_feedback_log_quotes
 
 
+def _truncate_log_value(value, max_chars=SCENARIO_LOG_MAX_CHUNK_CHARS):
+    if not isinstance(value, str):
+        return ''
+
+    if len(value) <= max_chars:
+        return value
+
+    keep_head = max_chars // 2
+    keep_tail = max_chars - keep_head
+    omitted = len(value) - max_chars
+
+    return (
+        value[:keep_head] +
+        '\n...[output shortened, {} chars omitted]...\n'.format(omitted) +
+        value[-keep_tail:]
+    )
+
+
+def _append_log_quote(feedback, quote, max_total_chars=SCENARIO_LOG_MAX_TOTAL_CHARS):
+    current_total = feedback['log'].setdefault('total_chars', 0)
+
+    if current_total >= max_total_chars:
+        if not feedback['log'].get('truncated'):
+            feedback['log']['quotes'].append({
+                'type': get_quote_type_dict('printing'),
+                'value': '\n...[additional output omitted to keep the report readable]...\n',
+            })
+            feedback['log']['truncated'] = True
+        return
+
+    new_quote = copy.deepcopy(quote)
+    value = _truncate_log_value(new_quote.get('value', ''))
+
+    remaining = max_total_chars - current_total
+    if len(value) > remaining:
+        omitted = len(value) - remaining
+        value = value[:remaining] + '\n...[output shortened, {} chars omitted]...\n'.format(omitted)
+
+    new_quote['value'] = value
+    feedback['log']['quotes'].append(new_quote)
+    feedback['log']['total_chars'] = current_total + len(value)
+
+    if feedback['log']['total_chars'] >= max_total_chars:
+        feedback['log']['truncated'] = True
+
+
 def play_scenario(scenario, executable_path,
                   executable_extra_args=None):
 
     feedback = copy.deepcopy(scenario)
-    feedback['log'] = {'quotes': [], 'text': ''}
+    feedback['log'] = {'quotes': [], 'text': '', 'total_chars': 0}
     feedback['feedback'] = {'type': None, 'text': None}
 
     executable_path_with_snr_args = executable_path
@@ -116,7 +165,7 @@ def play_scenario(scenario, executable_path,
                             spaces_pattern_string = ' '.join(list(quote_value.replace(' ', '').
                                                                   replace('\t', '')))
                             spaces_pattern_string = re.escape(spaces_pattern_string)
-                            spaces_pattern_string = spaces_pattern_string.replace('\ ', '\s*')
+                            spaces_pattern_string = spaces_pattern_string.replace(r'\ ', r'\s*')
 
                             pattern_spaces = re.compile(spaces_pattern_string)
                             patterns.append(pattern_spaces)
@@ -129,7 +178,7 @@ def play_scenario(scenario, executable_path,
                     except pexpect.EOF:
                         raise ShouldOutputBeforeEOF(quote)
                     except pexpect.TIMEOUT:
-                        raise ShouldOutput(quote)
+                        raise ScenarioTimeout()
 
                     # Negative output check
                     if (p.before is not None) and ('negative_output' in scenario):
@@ -144,9 +193,9 @@ def play_scenario(scenario, executable_path,
                         raise ShouldOutput(quote)
 
                     else:
-                        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                                          'value': p.before,
-                                                          })
+                        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                                     'value': p.before,
+                                                     })
                     # THE MATCH of the quote
                     assert p.after is not None
                     log_quote = {'type': get_quote_type_dict('output'),
@@ -156,7 +205,7 @@ def play_scenario(scenario, executable_path,
                     if 'strictness' in quote:
                         log_quote['strictness'] = quote['strictness']
 
-                    feedback['log']['quotes'].append(log_quote)
+                    _append_log_quote(feedback, log_quote)
 
                     # for flow False, no output should be
                     # AFTER the quote match UNTIL the END of the current LINE.
@@ -164,9 +213,9 @@ def play_scenario(scenario, executable_path,
                     if not scenario['flow'] or ('negative_output' in scenario):
                         p.expect(['\r\n', pexpect.TIMEOUT, pexpect.EOF])
 
-                        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                                          'value': p.before + xstr(p.after)
-                                                          })
+                        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                                     'value': p.before + xstr(p.after)
+                                                     })
 
                         if (p.before is not None) and ('negative_output' in scenario):
                             for negative_output in scenario['negative_output']:
@@ -217,14 +266,14 @@ def play_scenario(scenario, executable_path,
                     # TODO: maybe refactor that, and remove the printing quote
                     # adding in the except block, and move this line stright
                     # after the p.expect call
-                    feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                                      'value': p.before + xstr(p.after)
-                                                      })
+                    _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                                 'value': p.before + xstr(p.after)
+                                                 })
 
-                    feedback['log']['quotes'].append({'type': get_quote_type_dict('input'),
-                                                      'name': quote['name'],
-                                                      'value': quote['value'] + '\r\n'
-                                                      })
+                    _append_log_quote(feedback, {'type': get_quote_type_dict('input'),
+                                                 'name': quote['name'],
+                                                 'value': quote['value'] + '\r\n'
+                                                 })
 
         # compare_files logic
         if 'compare_files' in scenario:
@@ -243,9 +292,9 @@ def play_scenario(scenario, executable_path,
         
         if scenario['flow']:
             p.expect(['.+', pexpect.TIMEOUT, pexpect.EOF])
-            feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                              'value': p.before + xstr(p.after)
-                                              })
+            _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                         'value': p.before + xstr(p.after)
+                                         })
 
         try:
             p.expect(pexpect.EOF)
@@ -256,7 +305,7 @@ def play_scenario(scenario, executable_path,
     # REAL FEEDBACK EXCEPTIONS PART #
 
         except pexpect.TIMEOUT:
-            raise ShouldEOF()
+            raise ScenarioTimeout()
 
         # Negative output flip
         #if quote['type'] == 'negative_output':
@@ -269,32 +318,32 @@ def play_scenario(scenario, executable_path,
         feedback['result'] = get_result_dict(False)
 
         # if scenario['flow']:
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
 
         feedback['feedback'] = get_feedback_dict(e)
     
     except NegativeOutput as e:
         feedback['result'] = get_result_dict(False)
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
         feedback['feedback'] = get_feedback_dict(e)
     
     except WriteToFileFailed as e:
         feedback['result'] = get_result_dict(False)
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
         feedback['feedback'] = get_feedback_dict(e)
 
     except SholdNoOutputBeforeInput as e:
         feedback['result'] = get_result_dict(False)
 
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before
+                                     })
 
         feedback['last'] = True
         feedback['feedback'] = get_feedback_dict(e)
@@ -302,18 +351,18 @@ def play_scenario(scenario, executable_path,
     except ShouldInputBeforeEOF as e:
         feedback['result'] = get_result_dict(False)
 
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
 
         feedback['feedback'] = get_feedback_dict(e)
 
     except ShouldOutputBeforeEOF as e:
         feedback['result'] = get_result_dict(False)
 
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
 
         feedback['last'] = True
         feedback['feedback'] = get_feedback_dict(e)
@@ -321,13 +370,22 @@ def play_scenario(scenario, executable_path,
     except ShouldEOF as e:
         feedback['result'] = get_result_dict(False)
 
-        feedback['log']['quotes'].append({'type': get_quote_type_dict('printing'),
-                                          'value': p.before + xstr(p.after)
-                                          })
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
 
         if not scenario['flow']:
             pass
             # feedback['feedback'].append('instead the last line')
+
+        feedback['feedback'] = get_feedback_dict(e)
+
+    except ScenarioTimeout as e:
+        feedback['result'] = get_result_dict(False)
+
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': p.before + xstr(p.after)
+                                     })
 
         feedback['feedback'] = get_feedback_dict(e)
 
@@ -365,6 +423,9 @@ def play_scenario(scenario, executable_path,
 
     feedback['log']['quotes'] = break_lines_log_quotes(
         feedback['log']['quotes'])
+
+    feedback['log'].pop('total_chars', None)
+    feedback['log'].pop('truncated', None)
 
     # Generate feedback LOG text
     for quote in feedback['log']['quotes']:

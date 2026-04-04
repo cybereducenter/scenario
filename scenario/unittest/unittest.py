@@ -8,7 +8,10 @@ import sys
 import pathlib
 import unittest
 import inspect
+import multiprocessing
 from contextlib import contextmanager
+
+from scenario.consts import UNITTEST_TIMEOUT_DEFAULT
 
 # --- Configuration & Messages ---
 SIGNATURE_FEEDBACK_MSG = 'Function signature in code does not match required.\nExpected: {}\n'
@@ -113,48 +116,82 @@ class StandalonePythonUnitTest:
             json_output[external_index_string] = result
         return json_output, success
 
-    def _check_args(self, method_signature, method_name, log_buffer):
+    def _check_args(self, method_signature, method_name, log_buffer, namespace):
         try:
             left = method_signature.find('(') + 1
             right = method_signature.find(')')
             expected_args = method_signature[left:right].replace(' ', '').split(',')
-            inspected_args = inspect.getfullargspec(globals()[method_name]).args
+            inspected_args = inspect.getfullargspec(namespace[method_name]).args
             return inspected_args == expected_args
         except Exception:
             return False
 
-    def _test_signature(self, json_data, log_buffer):
+    def _test_signature(self, json_data, log_buffer, namespace):
         method_name = json_data.get('method_name', 'solution')
         method_signature = json_data.get('method_signature', 'solution')
-        if method_name not in globals():
+        if method_name not in namespace:
             return False, FUNC_NAME_FEEDBACK_MSG.format(method_name)
-        if method_signature != 'solution' and not self._check_args(method_signature, method_name, log_buffer):
+        if method_signature != 'solution' and not self._check_args(method_signature, method_name, log_buffer, namespace):
             return False, SIGNATURE_FEEDBACK_MSG.format(method_signature)
         return True, ""
 
-    def _run_single_test(self, json_data, json_output, external_index=0):
+    def _run_single_test(self, json_data, json_output, namespace, external_index=0):
         ext_str = str(external_index)
         test = json_data['test'][0]
         method_name = json_data.get('method_name', 'solution')
 
-        if method_name not in globals():
+        if method_name not in namespace:
             res = self._create_result(json_data, False, 'Failure')
             res['feedback'] = {'text': f'Function "{method_name}" not found.', 'type': 'NameError'}
             json_output[ext_str] = res
             return json_output, False
 
-        student_method = globals()[method_name]
+        student_method = namespace[method_name]
         return self._test_the_method(json_data, test, student_method, json_output, method_name, ext_str)
 
-def play_unittest(unittest, student_file_path):
+def _run_unittest_worker(unittest_data, code, result_queue):
+    tester = StandalonePythonUnitTest()
+    log_buffer = []
+    namespace = {"__builtins__": __builtins__, "__name__": "__main__"}
+
+    try:
+        exec(code, namespace)
+    except Exception as e:
+        result_queue.put({
+            "status": "feedback",
+            "feedback": {"type": "ImportError", "text": f"{CODE_ERROR_FEEDBACK_MSG}: {repr(e)}"},
+        })
+        return
+
+    sig_ok, sig_msg = tester._test_signature(unittest_data, log_buffer, namespace)
+    if not sig_ok:
+        result_queue.put({
+            "status": "feedback",
+            "feedback": {"type": "SignatureError", "text": sig_msg},
+        })
+        return
+
+    try:
+        json_output, success = tester._run_single_test(unittest_data, {}, namespace)
+        result_queue.put({
+            "status": "success",
+            "json_output": json_output,
+            "success": success,
+        })
+    except Exception as e:
+        result_queue.put({
+            "status": "feedback",
+            "feedback": {"type": "UnexpectedError", "text": str(e)},
+        })
+
+
+def play_unittest(unittest, student_file_path, timeout=None):
     feedback = copy.deepcopy(unittest)
     feedback["result"] = {"bool": False}
     feedback["signal_code"] = None
     feedback["exit_code"] = 1
     feedback["log"] = {"quotes": [], "text": ""}
     feedback["feedback"] = {"type": "UnknownUnittestError", "text": None}
-
-    log_buffer = []
 
     if not os.path.exists(student_file_path):
         feedback['feedback']['type'] = "FileError"
@@ -163,7 +200,10 @@ def play_unittest(unittest, student_file_path):
 
     tester = StandalonePythonUnitTest()
     code_path = LANGUAGE_DATA['python']['code_path']
-    json_output, n_snr, n_success = {}, 0, 0
+    json_output = {}
+    effective_timeout = timeout
+    if effective_timeout is None:
+        effective_timeout = unittest.get('timeout', UNITTEST_TIMEOUT_DEFAULT)
     
     try:
         with open(student_file_path, 'r', encoding='utf-8') as f:
@@ -172,39 +212,73 @@ def play_unittest(unittest, student_file_path):
             cf.write(code)
 
         # Syntax Check
-        res = subprocess.run([sys.executable, '-m', 'py_compile', code_path], capture_output=True, text=True)
+        res = subprocess.run(
+            [sys.executable, '-m', 'py_compile', code_path],
+            capture_output=True,
+            text=True,
+            timeout=effective_timeout,
+        )
         if res.returncode != 0:
             feedback['feedback'] = {"type": "SyntaxError", "text": res.stdout or res.stderr}
             return feedback
 
-        # Exec
-        try:
-            exec(code, globals())
-        except Exception as e:
-            feedback['feedback'] = {"type": "ImportError", "text": f"{CODE_ERROR_FEEDBACK_MSG}: {repr(e)}"}
+        result_queue = multiprocessing.Queue()
+        worker = multiprocessing.Process(
+            target=_run_unittest_worker,
+            args=(unittest, code, result_queue),
+        )
+        worker.start()
+        worker.join(effective_timeout)
+
+        if worker.is_alive():
+            worker.terminate()
+            worker.join()
+            feedback['feedback'] = {
+                "type": "TimeoutError",
+                "text": f"Unittest execution exceeded {effective_timeout} seconds. The code may be stuck in an infinite loop.",
+            }
             return feedback
 
-        sig_ok, sig_msg = tester._test_signature(unittest, log_buffer)
-        if not sig_ok:
-            feedback['feedback'] = {"type": "SignatureError", "text": sig_msg}
+        if worker.exitcode not in (0, None) and result_queue.empty():
+            feedback['feedback'] = {
+                "type": "UnexpectedError",
+                "text": "The unittest worker process exited unexpectedly.",
+            }
             return feedback
 
-        # TODO: get rid of n_snr, n_sucess
-        json_output, success = tester._run_single_test(unittest, json_output)
-        if success:
-            feedback['result']['bool'] = True
+        worker_result = result_queue.get() if not result_queue.empty() else {
+            "status": "feedback",
+            "feedback": {"type": "UnexpectedError", "text": "No result returned from unittest worker."},
+        }
+
+        if worker_result['status'] == 'feedback':
+            feedback['feedback'] = worker_result['feedback']
+            return feedback
+
+        json_output = worker_result['json_output']
+        success = worker_result['success']
+        feedback['result']['bool'] = bool(success)
 
         # Formatting values for the text field
         for item in json_output.values():
             if 'returned_value' in item: item['returned_value'] = repr(item['returned_value'])
             if 'expected' in item: item['expected'] = repr(item['expected'])
 
+        n_snr = len(json_output)
+        n_success = sum(1 for item in json_output.values() if item.get('result', {}).get('bool'))
         feedback['exit_code'] = 0 if feedback['result']['bool'] else 1
         feedback['log']['text'] = tester._build_results_text(json_output)
         
-        if not feedback['result']['bool']:
+        if feedback['result']['bool']:
+            feedback['feedback'] = {"type": None, "text": None}
+        else:
             feedback['feedback'] = {"type": "TestFailure", "text": f"Passed {n_success}/{n_snr} tests."}
 
+    except subprocess.TimeoutExpired:
+        feedback['feedback'] = {
+            "type": "TimeoutError",
+            "text": f"Unittest syntax check exceeded {effective_timeout} seconds.",
+        }
     except Exception as e:
         feedback['feedback'] = {"type": "UnexpectedError", "text": str(e)}
     finally:

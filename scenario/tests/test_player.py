@@ -5,7 +5,7 @@ import jsonschema
 
 from scenario.player import play_scenario
 from scenario.tests.consts import EXECUTABLE, DIALOUGE_PIECES
-from scenario.consts import SCENARIO_JSON_SCHEMA
+from scenario.consts import SCENARIO_JSON_SCHEMA, SCENARIO_LOG_MAX_TOTAL_CHARS
 
 
 class PlayerTest(unittest.TestCase):
@@ -202,27 +202,27 @@ class StrictnnessTests(PlayerTest):
 
 
 class ResultFalseTests(PlayerTest):
-    def test_ShouldOutput(self):
+    def test_ScenarioTimeout_waiting_for_output(self):
         '''
-        Feedback Error: Output Incorrect
+        Feedback Error: Scenario timeout while waiting for output
         '''
 
         dialogue = [DIALOUGE_PIECES['output_poet']]
 
         args = ['print', 'input']
 
-        self._run_test(False, 'ShouldOutput', args, dialogue)
+        self._run_test(False, 'ScenarioTimeout', args, dialogue)
 
-    def test_ShouldEOF(self):
+    def test_ScenarioTimeout_waiting_for_eof(self):
         '''
-        Feedback Error: Should EOF
+        Feedback Error: Scenario timeout while waiting for EOF
         '''
 
         dialogue = [DIALOUGE_PIECES['output4']]
 
         args = ['print', 'input']
 
-        self._run_test(False, 'ShouldEOF', args, dialogue)
+        self._run_test(False, 'ScenarioTimeout', args, dialogue)
 
     def test_ShouldOutputBeforeEOF(self):
         '''
@@ -257,6 +257,29 @@ class ResultFalseTests(PlayerTest):
 
     def test_MemoryFeedbackError(self):
         pass
+
+
+class ScenarioLogCapTests(PlayerTest):
+
+    def test_timeout_output_is_capped(self):
+        scenario = self._generate_scenario(
+            'scenario-log-cap',
+            ['ADD', '2', '3', '5', '7', '11', '13'],
+            [{
+                'type': 'output',
+                'name': 'result',
+                'value': '41',
+            }],
+        )
+
+        executable = '/home/ubuntu/scenario/scenario/tests/infinite_loop/program'
+        feedback = play_scenario(scenario, executable)
+
+        self.assertEqual(feedback['result']['bool'], False)
+        self.assertEqual(feedback['feedback']['type'], 'ScenarioTimeout')
+        self.assertIn('output shortened', feedback['log']['text'])
+        self.assertLessEqual(len(feedback['log']['text']), SCENARIO_LOG_MAX_TOTAL_CHARS)
+
 
 
 class MemoryTests(PlayerTest):

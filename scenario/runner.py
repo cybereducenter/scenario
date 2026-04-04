@@ -27,6 +27,6 @@ def run_unittest(executable_path, unittest_path,
                  executable_extra_args=None):
     
     unittest = parse_unittest_json(unittest_path) 
-    feedback = play_unittest(unittest, executable_path)
+    feedback = play_unittest(unittest, executable_path, timeout=timeout)
 
     return feedback

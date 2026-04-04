@@ -113,6 +113,13 @@ class MemoryFeedbackError(InternalFeedbackException):
         InternalFeedbackException.__init__(self, MemoryFeedbackError.msg, {})
 
 
+class ScenarioTimeout(InternalFeedbackException):
+    msg = 'ריצת התוכנית חרגה מזמן הריצה שהוגדר לתרחיש. אולי יש לולאה אינסופית בקוד?'
+
+    def __init__(self):
+        InternalFeedbackException.__init__(self, ScenarioTimeout.msg, {})
+
+
 class ExternalFeedbackException(FeedbackException):
     def __init__(self, msg, quote=None):
         FeedbackException.__init__(self, msg, quote)

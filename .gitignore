@@ -101,3 +101,6 @@ ENV/
 .venv/bin/python3.12
 .venv/bin/scenario
 .venv/man/man1/nosetests.1
+
+# Local scenario timeout experiments
+scenario/tests/infinite_loop/

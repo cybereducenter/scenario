@@ -17,6 +17,10 @@
     "method_signature": {
       "type": "string"
     },
+    "timeout": {
+      "type": "number",
+      "minimum": 0
+    },
     "test" :{
       "type": "array",
       "items": {

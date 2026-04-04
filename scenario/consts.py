@@ -61,6 +61,13 @@ QUOTE_TYPE_HE_TEXT = {'printing': 'הדפסה',
 # (not needed in macOS)
 DELAY_BEFORE_SEND = 0.2
 
+# Default timeout in seconds for unittest execution when not provided.
+UNITTEST_TIMEOUT_DEFAULT = 5.0
+
+# Scenario log limits to keep runaway output from bloating feedback.
+SCENARIO_LOG_MAX_TOTAL_CHARS = 2000
+SCENARIO_LOG_MAX_CHUNK_CHARS = 500
+
 # https://people.cs.pitt.edu/~alanjawi/cs449/code/shell/UnixSignals.htm
 SIGNALS = {
     1: ('SIGHUP', 'Hangup'),
