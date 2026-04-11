@@ -20,7 +20,8 @@ from scenario.player.feedback_exceptions import SholdNoOutputBeforeInput, \
     NegativeOutput,           \
     WriteToFileFailed,        \
     MemoryFeedbackError,      \
-    ScenarioTimeout
+    ScenarioTimeout,          \
+    OutputDecodingError
 
 from scenario.utils import xstr,  \
     get_cleaned_before,  \
@@ -388,6 +389,15 @@ def play_scenario(scenario, executable_path,
                                      })
 
         feedback['feedback'] = get_feedback_dict(e)
+
+    except UnicodeDecodeError as e:
+        feedback['result'] = get_result_dict(False)
+
+        _append_log_quote(feedback, {'type': get_quote_type_dict('printing'),
+                                     'value': xstr(p.before) + xstr(p.after)
+                                     })
+
+        feedback['feedback'] = get_feedback_dict(OutputDecodingError(e))
 
         '''
         if get_cleaned_before(p, scenario['strictness']):

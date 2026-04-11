@@ -120,6 +120,19 @@ class ScenarioTimeout(InternalFeedbackException):
         InternalFeedbackException.__init__(self, ScenarioTimeout.msg, {})
 
 
+class OutputDecodingError(InternalFeedbackException):
+    msg = (
+        'פלט התוכנית אינו מקודד ב-UTF-8 תקין, ולכן לא ניתן היה לבדוק את התרחיש.'
+        + '\n' +
+        '{details}'
+    )
+
+    def __init__(self, error):
+        details = str(error) if error else 'Unknown decoding error.'
+        InternalFeedbackException.__init__(self, OutputDecodingError.msg,
+                                           {'details': details})
+
+
 class ExternalFeedbackException(FeedbackException):
     def __init__(self, msg, quote=None):
         FeedbackException.__init__(self, msg, quote)

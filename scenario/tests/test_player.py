@@ -1,5 +1,7 @@
 import unittest
 import pprint
+import os
+import tempfile
 
 import jsonschema
 
@@ -257,6 +259,29 @@ class ResultFalseTests(PlayerTest):
 
     def test_MemoryFeedbackError(self):
         pass
+
+    def test_OutputDecodingError(self):
+        dialogue = [{
+            'type': 'output',
+            'name': 'some output',
+            'value': ''
+        }]
+
+        scenario = self._generate_scenario('decode_error', [], dialogue)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            executable_path = os.path.join(tmpdir, 'bad_output.sh')
+            with open(executable_path, 'w') as f:
+                f.write('#!/bin/sh\n')
+                f.write('printf "\\252"\n')
+
+            os.chmod(executable_path, 0o755)
+
+            feedback = play_scenario(scenario, executable_path)
+
+        self.assertEqual(feedback['result']['bool'], False)
+        self.assertEqual(feedback['feedback']['type'], 'OutputDecodingError')
+        self.assertIn('utf-8', feedback['feedback']['text'])
 
 
 class ScenarioLogCapTests(PlayerTest):

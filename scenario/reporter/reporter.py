@@ -57,6 +57,14 @@ def reporter_generate_html(
     def _strip_newlines(s: str) -> str:
         return s.replace("\r", "").replace("\n", "")
 
+    def _normalize_feedback_summary(s: str) -> str:
+        parts = [
+            part.strip()
+            for part in s.replace("\r", "\n").split("\n")
+            if part.strip()
+        ]
+        return " | ".join(parts)
+
     def _quote_kind(q: dict[str, Any]) -> str:
         t = q.get("type")
         if isinstance(t, dict):
@@ -149,11 +157,11 @@ def reporter_generate_html(
             if passed:
                 feedback_text = ""
             else:
-                feedback_text = str(
+                feedback_text = _normalize_feedback_summary(str(
                     ((t.get("feedback") or {}).get("error"))
                     or ((t.get("feedback") or {}).get("text"))
                     or ""
-                )
+                ))
 
             one_line = []
             one_line.append(RenderLine(
@@ -180,7 +188,9 @@ def reporter_generate_html(
             name = str(t.get("name", ""))
             description = str(t.get("description", ""))
             passed = bool((t.get("result") or {}).get("bool", False))
-            feedback_text = str(((t.get("feedback") or {}).get("text")) or "")
+            feedback_text = _normalize_feedback_summary(
+                str(((t.get("feedback") or {}).get("text")) or "")
+            )
 
             quotes = ((t.get("log") or {}).get("quotes")) or []
 
