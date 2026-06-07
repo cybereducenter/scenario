@@ -67,7 +67,9 @@
               <tbody>
                 {% for res in t.results %}
                 <tr>
-                  <td dir="ltr" class="vpl-td-call">{{ res.call }}</td>
+                  <td dir="ltr" class="vpl-td-call">
+                    <span class="vpl-call-method">{{ res.call_method }}</span>(<span class="vpl-call-args">{{ res.call_args }}</span>)
+                  </td>
                   <td dir="ltr">{{ res.expected }}</td>
                   <td dir="ltr">{{ res.actual }}</td>
                 </tr>

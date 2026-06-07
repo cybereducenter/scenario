@@ -155,8 +155,6 @@ def reporter_generate_html(
             args = res.get("arguments_sent")
             # Format arguments as a nice comma-separated list
             args_str = ", ".join(repr(arg) for arg in args)
-            call_sig = f"{method}({args_str})"
-            
             expected = res.get("expected")
             actual = res.get("returned_value")
 
@@ -169,7 +167,8 @@ def reporter_generate_html(
                     actual = "Error"
 
             formatted_results.append({
-                "call": call_sig,
+                "call_method": method,
+                "call_args": args_str,
                 "expected": expected,
                 "actual": actual,
                 "passed": passed_test
