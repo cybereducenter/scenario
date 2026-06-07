@@ -30,7 +30,8 @@
               "string",
               "number",
               "object",
-              "boolean"
+              "boolean",
+              "array"
             ]
           }
         },
