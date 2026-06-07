@@ -36,6 +36,7 @@ class RenderTest:
     passed: bool
     feedback_text: str
     lines: list[RenderLine]
+    results: list[dict] = None
 
 
 # ============================================================
@@ -147,6 +148,33 @@ def reporter_generate_html(
 
         quotes = ((t.get("log") or {}).get("quotes")) or []
 
+        # Format structured test results for the 3-column table
+        formatted_results = []
+        for res in t.get("test_results", []):
+            method = res.get("method_name")
+            args = res.get("arguments_sent")
+            # Format arguments as a nice comma-separated list
+            args_str = ", ".join(repr(arg) for arg in args)
+            call_sig = f"{method}({args_str})"
+            
+            expected = res.get("expected")
+            actual = res.get("returned_value")
+
+            passed_test = bool(res.get("result", {}).get("bool", False))
+            if not passed_test:
+                error_msg = res.get("feedback", {}).get("text")
+                if actual is None and error_msg:
+                    actual = f"Error: {error_msg}"
+                elif actual is None:
+                    actual = "Error"
+
+            formatted_results.append({
+                "call": call_sig,
+                "expected": expected,
+                "actual": actual,
+                "passed": passed_test
+            })
+
         render_tests.append(
             RenderTest(
                 id=test_id,
@@ -155,6 +183,7 @@ def reporter_generate_html(
                 passed=passed,
                 feedback_text=feedback_text,
                 lines=_merge_quotes_to_lines(quotes),
+                results=formatted_results,
             )
         )
 
@@ -205,8 +234,10 @@ def reporter_generate_html(
         lstrip_blocks=True,
     )
 
-    if format_type == "vpl":
-        template = env.get_template("vpl_report.html.j2")
+    if format_type == "vpl_scenario":
+        template = env.get_template("vpl_report_scenario.html.j2")
+    elif format_type == "vpl_unittest":
+        template = env.get_template("vpl_report_unittest.html.j2")
     else:
         template = env.get_template("report.html.j2")
 

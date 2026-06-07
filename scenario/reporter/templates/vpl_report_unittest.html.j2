@@ -1,0 +1,86 @@
+<div class="moodle-report-wrap" dir="rtl">
+  <div class="vpl-wrap">
+
+    <!-- Top summary section -->
+    <div class="vpl-topbar">
+      <div>
+        <div class="vpl-title">{{ title_text }}</div>
+        {% if subtitle_text %}
+        <div class="vpl-sub">{{ subtitle_text }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Gauge score -->
+      <div class="vpl-scoreContainer">
+        <div class="vpl-scoreBox">
+          <svg width="118" height="59">
+            {% if score_percent == 100 %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="{{ gauge_color }}" style="stroke-width:24" />
+            {% elif score_percent == 0 %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="#D3D3DB" style="stroke-width:24" />
+            {% else %}
+            <path d="M 14 58 A 45 45 0 0 1 104 58" fill="none" stroke="#D3D3DB" style="stroke-width:24" />
+            <path d="M 14 58 A 45 45 0 {{ gauge_large_arc }} 1 {{ gauge_end_x }} {{ gauge_end_y }}" fill="none"
+              stroke="{{ gauge_color }}" style="stroke-width:24" />
+            {% endif %}
+          </svg>
+          <div class="vpl-gauge-text">{{ score_percent }}%</div>
+        </div>
+        <div class="vpl-scoreLabel">{{ passed }}/{{ total }} טסטים עברו</div>
+      </div>
+    </div>
+
+    <div class="vpl-sectionTitle">{{ section_title }}</div>
+
+    <!-- Loop over tests -->
+    <div class="vpl-tests">
+      {% for t in tests %}
+      <details class="vpl-test">
+        <summary class="vpl-row">
+          <div class="vpl-testMain">
+            <div class="vpl-test-header-row">
+              <div class="vpl-badge {{ 'vpl-ok' if t.passed else 'vpl-fail' }}">
+                {{ '✓ הצלחה' if t.passed else '✗ אי-הצלחה' }}
+              </div>
+              <div class="vpl-name">{{ t.name }}</div>
+            </div>
+          </div>
+
+          <span class="vpl-chev">▾</span>
+        </summary>
+
+        <!-- Collapsible details -->
+        <div class="vpl-details">
+          <div class="vpl-boxTitle">תיאור הבדיקה</div>
+          <div class="vpl-hint">{{ t.description }}</div>
+
+          <div class="vpl-boxTitle"></div>
+          <div class="vpl-tableWrap">
+            <table class="vpl-resultsTable">
+              <thead>
+                <tr>
+                  <th class="vpl-col-details">פרטי טסט</th>
+                  <th class="vpl-col-expected">צפוי</th>
+                  <th class="vpl-col-actual">התקבל בפועל</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for res in t.results %}
+                <tr>
+                  <td dir="ltr" class="vpl-td-call">{{ res.call }}</td>
+                  <td dir="ltr">{{ res.expected }}</td>
+                  <td dir="ltr">{{ res.actual }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </details>
+      {% endfor %}
+    </div>
+
+    <div class="vpl-foot">{{ footer_text }}</div>
+  </div>
+</div>

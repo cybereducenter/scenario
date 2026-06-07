@@ -199,6 +199,8 @@ def play_unittest(unittest, student_file_path):
             if 'returned_value' in item: item['returned_value'] = repr(item['returned_value'])
             if 'expected' in item: item['expected'] = repr(item['expected'])
 
+        feedback['test_results'] = list(json_output.values())
+
         feedback['exit_code'] = 0 if feedback['result']['bool'] else 1
         feedback['log']['text'] = tester._build_results_text(json_output)
         
