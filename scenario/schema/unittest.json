@@ -34,13 +34,12 @@
               "string",
               "number",
               "object",
-              "boolean"
+              "boolean",
+              "array"
             ]
           }
         },
-        "expected": {
-          "type": "object"
-        },
+        "expected": {},
         "error": {
           "type": "string"
         }
@@ -57,7 +56,6 @@
     "name",
     "description",
     "method_name",
-    "method_signature",
     "test"
   ]
 }
