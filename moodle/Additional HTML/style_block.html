@@ -12,6 +12,12 @@
     border-color: #ffffff;
 }
 
+/* Fix for long strings overflowing the page */
+.que .content {
+    min-width: 0 !important;
+    overflow-wrap: break-word !important;
+}
+
 /* Hide the outcome-specific feedback heading */
 .outcome .specificfeedback .mt-1 h5 {
   display: none !important;
@@ -36,11 +42,8 @@
 .vpl-compile-box {
   direction: rtl;
   text-align: right;
-
   padding: 0 16px;
-
   border-radius: 10px;
-
   color: red;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
@@ -49,7 +52,6 @@
 .vpl-compile-title {
   font-weight: 600;
   font-size: 0.95rem;
-
   margin-bottom: 10px;
 }
 
@@ -57,20 +59,15 @@
 .vpl-compile-log {
   direction: ltr;
   text-align: left;
-
   margin: 0;
   padding: 12px 14px;
-
   border-radius: 8px;
   border: 1px solid #ead0d0;
-
   background: #1e1e1e;
   color: red;
-
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9rem;
   line-height: 1.45;
-
   white-space: pre-wrap;
   word-break: break-word;
   overflow-x: auto;
@@ -521,6 +518,71 @@
     margin-right: 112px;
     padding: 0;
     background: none;
+}
+
+/* ============================================================
+   Unittest Report — Results Table
+   Table layout for displaying test call / expected / actual.
+   ============================================================ */
+
+.moodle-report-wrap .vpl-resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+    font-size: 15px;
+}
+
+.moodle-report-wrap .vpl-resultsTable thead tr {
+    background-color: var(--vpl-color-bg-light);
+    border-bottom: 2px solid var(--vpl-color-border);
+}
+
+.moodle-report-wrap .vpl-resultsTable th {
+    padding: 12px;
+    border: 1px solid var(--vpl-color-border);
+    font-weight: 700;
+    text-align: center;
+}
+
+.moodle-report-wrap .vpl-resultsTable th.vpl-col-details { width: 40%; }
+.moodle-report-wrap .vpl-resultsTable th.vpl-col-expected { width: 30%; }
+.moodle-report-wrap .vpl-resultsTable th.vpl-col-actual   { width: 30%; }
+
+.moodle-report-wrap .vpl-resultsTable tbody tr {
+    border-bottom: 1px solid var(--vpl-color-border);
+}
+
+.moodle-report-wrap .vpl-resultsTable td {
+    padding: 12px;
+    border: 1px solid var(--vpl-color-border);
+    text-align: left;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    color: var(--vpl-color-primary);
+}
+
+.moodle-report-wrap .vpl-resultsTable td.vpl-td-call {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* ============================================================
+   Unittest Call Signature — argument highlighting
+   ============================================================ */
+
+.moodle-report-wrap .vpl-call-method {
+    color: var(--vpl-color-primary);
+    font-weight: 600;
+}
+
+.moodle-report-wrap .vpl-call-args {
+    background: #E6F2F5;
+    color: var(--vpl-color-primary);
+    border: 1px solid #8FA7C0;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 /* ============================================================
