@@ -179,6 +179,19 @@ def play_scenario(scenario, executable_path,
                     except pexpect.EOF:
                         raise ShouldOutputBeforeEOF(quote)
                     except pexpect.TIMEOUT:
+                        if not p.isalive():
+                            raise ShouldOutputBeforeEOF(quote)
+                        # Distinguish true infinite loop (still printing) from
+                        # program stuck waiting for input (wrong/missing output).
+                        # Clear both pexpect's buffer and _before accumulator
+                        # so existing_data() doesn't replay stale menu text,
+                        # then check if the process sends new non-whitespace output.
+                        p.buffer = ''
+                        p._before = p.buffer_type()
+                        try:
+                            p.expect(r'\S', timeout=0.1)
+                        except (pexpect.TIMEOUT, pexpect.EOF):
+                            raise ShouldOutputBeforeEOF(quote)
                         raise ScenarioTimeout()
 
                     # Negative output check
@@ -299,14 +312,13 @@ def play_scenario(scenario, executable_path,
 
         try:
             p.expect(pexpect.EOF)
-
-            if not scenario['flow'] and get_cleaned_before(p, scenario['strictness']):
-                raise pexpect.TIMEOUT
+        except pexpect.TIMEOUT:
+            raise ScenarioTimeout()
 
     # REAL FEEDBACK EXCEPTIONS PART #
 
-        except pexpect.TIMEOUT:
-            raise ScenarioTimeout()
+        if not scenario['flow'] and get_cleaned_before(p, scenario['strictness']):
+            raise ShouldEOF()
 
         # Negative output flip
         #if quote['type'] == 'negative_output':
