@@ -136,7 +136,8 @@ def main():
         print(html_string)
     
     elif args.format == 'vpl_html':
-        grade, html_string = reporter_generate_html(feedback_list, format_type="vpl")
+        report_format = "vpl_unittest" if args.unittest else "vpl_scenario"
+        grade, html_string = reporter_generate_html(feedback_list, format_type=report_format)
         print(COMMENT_PREFIX + html_string.replace('\n', '').replace('\r', ''))
         print(GRADE_PREFIX + str(grade))
     
