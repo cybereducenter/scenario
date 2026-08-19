@@ -181,7 +181,24 @@ def reporter_generate_html(
                 "actual": actual,
                 "passed": passed_test
             })
-            
+
+        # Whole-run failures (signature mismatch, import/exec error, syntax
+        # error, timeout, ...) never produce a test_results entry, since the
+        # student's method was never called. Synthesize one row from the
+        # original test spec so the error is still visible in the table.
+        if not formatted_results and "method_name" in t:
+            test_spec = (t.get("test") or [{}])[0]
+            args = test_spec.get("args", [])
+            args_str = ", ".join(repr(arg) for arg in args)
+
+            formatted_results.append({
+                "call_method": t.get("method_name"),
+                "call_args": args_str,
+                "expected": test_spec.get("expected"),
+                "actual": f"Error: {feedback_text}" if feedback_text else "Error",
+                "passed": False
+            })
+
         render_tests.append(
             RenderTest(
                 id=test_id,
