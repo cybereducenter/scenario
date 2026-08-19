@@ -585,6 +585,68 @@
     letter-spacing: 0.01em;
 }
 
+
+    /*********************** unittest */
+    .moodle-report-wrap .vpl-resultsTable {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: right;
+        font-size: 15px;
+    }
+
+    .moodle-report-wrap .vpl-resultsTable thead tr {
+        background-color: var(--vpl-color-bg-light);
+        border-bottom: 2px solid var(--vpl-color-border);
+    }
+
+    .moodle-report-wrap .vpl-resultsTable th {
+        padding: 12px;
+        border: 1px solid var(--vpl-color-border);
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .moodle-report-wrap .vpl-resultsTable th.vpl-col-details {
+        width: 40%;
+    }
+
+    .moodle-report-wrap .vpl-resultsTable th.vpl-col-expected {
+        width: 30%;
+    }
+
+    .moodle-report-wrap .vpl-resultsTable th.vpl-col-actual {
+        width: 30%;
+    }
+
+    .moodle-report-wrap .vpl-resultsTable tbody tr {
+        border-bottom: 1px solid var(--vpl-color-border);
+    }
+
+    .moodle-report-wrap .vpl-resultsTable td {
+        padding: 12px;
+        border: 1px solid var(--vpl-color-border);
+        text-align: left;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 14px;
+        color: var(--vpl-color-primary);
+    }
+
+    .moodle-report-wrap .vpl-resultsTable td.vpl-td-call {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .moodle-report-wrap .vpl-call-args {
+        background: #E6F2F5;
+        color: var(--vpl-color-primary);
+        border: 1px solid #8FA7C0;
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
 /* ============================================================
    Footer
    Centred, muted footer text at the bottom of the report.
