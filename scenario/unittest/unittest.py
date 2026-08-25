@@ -116,6 +116,59 @@ class StandalonePythonUnitTest:
             json_output[external_index_string] = result
         return json_output, success
 
+    def _test_file_compare(self, file_compare, json_output, json_data, external_index_string):
+        student_file = file_compare['student_file']
+        model_file = file_compare['model_file']
+
+        try:
+            with open(student_file, 'r', encoding='utf-8') as f1, open(model_file, 'r', encoding='utf-8') as f2:
+                are_equal = f1.read() == f2.read()
+        except FileNotFoundError:
+            result = self._create_result(json_data, False, 'Failure')
+            result['feedback'] = {
+                'text': file_compare.get('file_not_found_error', 'File not found.'),
+                'type': 'FileNotFoundError',
+            }
+            result['returned_value'] = 'File not found'
+            result['expected'] = 'A file with the required content'
+            result['method_name'] = json_data.get('method_name', 'solution')
+            result['arguments_sent'] = json_data.get('test', [{}])[0].get('args', [])
+            json_output[external_index_string] = result
+            return json_output, False
+        except Exception:
+            result = self._create_result(json_data, False, 'Failure')
+            result['feedback'] = {
+                'text': file_compare.get('read_error', 'Could not read file.'),
+                'type': 'FileReadError',
+            }
+            result['returned_value'] = 'Could not read file'
+            result['expected'] = 'A file with the required content'
+            result['method_name'] = json_data.get('method_name', 'solution')
+            result['arguments_sent'] = json_data.get('test', [{}])[0].get('args', [])
+            json_output[external_index_string] = result
+            return json_output, False
+
+        if are_equal:
+            result = self._create_result(json_data, True, 'Success')
+            result['returned_value'] = 'File content matches expected output'
+            result['expected'] = 'A file with the required content'
+            result['method_name'] = json_data.get('method_name', 'solution')
+            result['arguments_sent'] = json_data.get('test', [{}])[0].get('args', [])
+            json_output[external_index_string] = result
+            return json_output, True
+
+        result = self._create_result(json_data, False, 'Failure')
+        result['feedback'] = {
+            'text': file_compare.get('error_message', 'File content does not match expected output.'),
+            'type': 'ContentMismatch',
+        }
+        result['returned_value'] = 'File content does not match expected output'
+        result['expected'] = 'A file with the required content'
+        result['method_name'] = json_data.get('method_name', 'solution')
+        result['arguments_sent'] = json_data.get('test', [{}])[0].get('args', [])
+        json_output[external_index_string] = result
+        return json_output, False
+
     def _check_args(self, method_signature, method_name, log_buffer, namespace):
         try:
             left = method_signature.find('(') + 1
@@ -139,6 +192,7 @@ class StandalonePythonUnitTest:
         ext_str = str(external_index)
         test = json_data['test'][0]
         method_name = json_data.get('method_name', 'solution')
+        file_compare = json_data.get('file_compare')
 
         if method_name not in namespace:
             res = self._create_result(json_data, False, 'Failure')
@@ -147,7 +201,15 @@ class StandalonePythonUnitTest:
             return json_output, False
 
         student_method = namespace[method_name]
-        return self._test_the_method(json_data, test, student_method, json_output, method_name, ext_str)
+        json_output, success = self._test_the_method(json_data, test, student_method, json_output, method_name, ext_str)
+
+        # Test a file comparison, used to validate write-to-file functionality.
+        # Only runs once the return-value assertion above already passed --
+        # a wrong return value is reported as-is, the file is never opened.
+        if file_compare and success:
+            json_output, success = self._test_file_compare(file_compare, json_output, json_data, ext_str)
+
+        return json_output, success
 
 def _run_unittest_worker(unittest_data, code, result_queue):
     tester = StandalonePythonUnitTest()

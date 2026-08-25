@@ -49,6 +49,20 @@
         "args",
         "expected"
       ]
+    },
+    "file_compare": {
+      "type": "object",
+      "properties": {
+        "student_file": {"type": "string"},
+        "model_file": {"type": "string"},
+        "error_message": {"type": "string"},
+        "file_not_found_error": {"type": "string"},
+        "read_error": {"type": "string"}
+      },
+      "required": [
+        "student_file",
+        "model_file"
+      ]
     }
   },
   "required": [
